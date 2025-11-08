@@ -1,78 +1,63 @@
 package com.elab.amortizaplus.domain.usecase
 
-import com.elab.amortizaplus.domain.calculator.ExtraAmortizationCalculator
-import com.elab.amortizaplus.domain.calculator.PriceCalculator
-import com.elab.amortizaplus.domain.calculator.SacCalculator
-import com.elab.amortizaplus.domain.model.AmortizationSystem
+import com.elab.amortizaplus.domain.calculator.FinancingCalculator
+import com.elab.amortizaplus.domain.model.InterestRate
 import com.elab.amortizaplus.domain.model.Simulation
 import com.elab.amortizaplus.domain.model.SimulationResult
+import com.elab.amortizaplus.domain.model.calculateSavingsComparedTo
+import com.elab.amortizaplus.domain.model.toSummary
 
 /**
  * Responsável por orquestrar o cálculo completo do financiamento.
- * Seleciona o sistema de amortização (SAC/PRICE),
- * aplica amortizações extras e gera os resumos.
+ *
+ * Entrada: Simulation (parâmetros do financiamento)
+ * Saída: SimulationResult (parcelas e resumos comparativos)
  */
 class CalculateFinancingUseCase(
-    private val sacCalculator: SacCalculator,
-    private val priceCalculator: PriceCalculator,
-    private val extraAmortizationCalculator: ExtraAmortizationCalculator
+    private val financingCalculator: FinancingCalculator = FinancingCalculator()
 ) {
 
     operator fun invoke(simulation: Simulation): SimulationResult {
-        // Escolhe a calculadora apropriada
-        val installmentsWithoutExtra = when (simulation.amortizationSystem) {
-            AmortizationSystem.SAC -> sacCalculator.calculate(
-                loanAmount = simulation.loanAmount,
-                monthlyRate = simulation.interestRate,
-                terms = simulation.terms
-            )
-            AmortizationSystem.PRICE -> priceCalculator.calculate(
-                loanAmount = simulation.loanAmount,
-                monthlyRate = simulation.interestRate,
-                terms = simulation.terms
-            )
-        }
+        val rate = InterestRate.Annual(simulation.interestRate)
+        val extrasMap = buildExtrasMap(simulation)
 
-        // Converte lista → mapa
-        val extrasMap = simulation.extraAmortizations.associate { it.month to it.amount }
-
-        val installmentsWithExtra = when (simulation.amortizationSystem) {
-            AmortizationSystem.SAC -> sacCalculator.calculate(
-                loanAmount = simulation.loanAmount,
-                monthlyRate = simulation.interestRate,
-                terms = simulation.terms,
-                extraAmortizations = extrasMap
-            )
-            AmortizationSystem.PRICE -> priceCalculator.calculate(
-                loanAmount = simulation.loanAmount,
-                monthlyRate = simulation.interestRate,
-                terms = simulation.terms,
-                extraAmortizations = extrasMap
-            )
-        }
-
-        // Gera os resumos (agora compatíveis com system opcional)
-        val summaryWithout = extraAmortizationCalculator.calculateSummary(installmentsWithoutExtra)
-            .copy(system = simulation.amortizationSystem)
-        val summaryWith = extraAmortizationCalculator.calculateSummary(installmentsWithExtra)
-            .copy(system = simulation.amortizationSystem)
-
-        // Calcula comparativo
-        val reducedMonths = summaryWithout.totalMonths - summaryWith.totalMonths
-        val interestSavings = summaryWithout.totalInterest - summaryWith.totalInterest
-
-        val summaryWithFinal = summaryWith.copy(
-            reducedMonths = reducedMonths,
-            interestSavings = interestSavings
+        // Cenário sem amortizações (baseline)
+        val paymentsWithoutExtra = financingCalculator.calculate(
+            loanAmount = simulation.loanAmount,
+            rate = rate,
+            terms = simulation.terms,
+            system = simulation.amortizationSystem,
+            extraAmortizations = emptyMap(),
+            reduceTerm = false
         )
 
-        // Retorna resultado completo
+        // Cenário com amortizações
+        val paymentsWithExtra = financingCalculator.calculate(
+            loanAmount = simulation.loanAmount,
+            rate = rate,
+            terms = simulation.terms,
+            system = simulation.amortizationSystem,
+            extraAmortizations = extrasMap,
+            reduceTerm = true // assumimos redução de prazo como padrão
+        )
+
+        // Gera resumos
+        val summaryWithout = paymentsWithoutExtra.toSummary(simulation.amortizationSystem)
+        val summaryWith = paymentsWithExtra.toSummary(simulation.amortizationSystem)
+            .calculateSavingsComparedTo(summaryWithout)
+
         return SimulationResult(
             simulation = simulation,
-            paymentsWithoutExtra = installmentsWithoutExtra,
-            paymentsWithExtra = installmentsWithExtra,
+            paymentsWithoutExtra = paymentsWithoutExtra,
+            paymentsWithExtra = paymentsWithExtra,
             summaryWithoutExtra = summaryWithout,
-            summaryWithExtra = summaryWithFinal
+            summaryWithExtra = summaryWith
         )
     }
+
+    /**
+     * Converte lista de ExtraAmortization em Map<Int, Double>.
+     */
+    private fun buildExtrasMap(simulation: Simulation): Map<Int, Double> =
+        simulation.extraAmortizations.associate { it.month to it.amount }
 }

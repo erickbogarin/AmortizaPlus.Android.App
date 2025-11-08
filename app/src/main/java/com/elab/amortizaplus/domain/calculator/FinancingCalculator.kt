@@ -4,17 +4,23 @@ import com.elab.amortizaplus.domain.model.AmortizationSystem
 import com.elab.amortizaplus.domain.model.Installment
 import com.elab.amortizaplus.domain.model.InterestRate
 import com.elab.amortizaplus.domain.model.SimulationSummary
+import com.elab.amortizaplus.domain.model.calculateSavingsComparedTo
+import com.elab.amortizaplus.domain.model.toSummary
+import com.elab.amortizaplus.domain.util.MathUtils.nonNegative
 import kotlin.math.pow
-import kotlin.math.roundToInt
 
 /**
- * Calculadora de financiamento com suporte a SAC e Price,
- * incluindo amortização extra e taxas anuais/mensais.
+ * Calculadora principal de financiamento.
+ * Orquestra SAC e PRICE, delegando para calculadoras especializadas.
  */
-class FinancingCalculator {
+class FinancingCalculator(
+    private val sacCalculator: SacCalculator = SacCalculator(),
+    private val priceCalculator: PriceCalculator = PriceCalculator()
+) {
 
-    private val sacCalculator = SacCalculator()
-
+    /**
+     * Calcula um financiamento com sistema de amortização especificado.
+     */
     fun calculate(
         loanAmount: Double,
         rate: InterestRate,
@@ -24,6 +30,7 @@ class FinancingCalculator {
         reduceTerm: Boolean = true
     ): List<Installment> {
         val monthlyRate = rate.asMonthly()
+
         return when (system) {
             AmortizationSystem.SAC -> sacCalculator.calculate(
                 loanAmount = loanAmount,
@@ -32,14 +39,20 @@ class FinancingCalculator {
                 extraAmortizations = extraAmortizations,
                 reduceTerm = reduceTerm
             )
-            AmortizationSystem.PRICE -> calculatePriceSystem(
-                loanAmount,
-                monthlyRate,
-                terms
+            AmortizationSystem.PRICE -> priceCalculator.calculate(
+                loanAmount = loanAmount,
+                monthlyRate = monthlyRate,
+                terms = terms,
+                extraAmortizations = extraAmortizations,
+                reduceTerm = reduceTerm
             )
         }
     }
 
+    /**
+     * Compara dois cenários: com e sem amortizações extras.
+     * Retorna (resumo sem extras, resumo com extras incluindo economia).
+     */
     fun compare(
         loanAmount: Double,
         rate: InterestRate,
@@ -48,52 +61,28 @@ class FinancingCalculator {
         extraAmortizations: Map<Int, Double> = emptyMap(),
         reduceTerm: Boolean = true
     ): Pair<SimulationSummary, SimulationSummary> {
-        val installmentsWithout = calculate(loanAmount, rate, terms, system, emptyMap(), false)
-        val installmentsWith = calculate(loanAmount, rate, terms, system, extraAmortizations, reduceTerm)
-        return installmentsWithout.toSummary(system) to installmentsWith.toSummary(system)
-    }
-
-    private fun calculatePriceSystem(
-        loanAmount: Double,
-        monthlyRate: Double,
-        terms: Int
-    ): List<Installment> {
-        val installments = mutableListOf<Installment>()
-        val factor = (monthlyRate * (1 + monthlyRate).pow(terms)) / ((1 + monthlyRate).pow(terms) - 1)
-        val fixedInstallment = loanAmount * factor
-
-        var balance = loanAmount
-        for (month in 1..terms) {
-            val interest = balance * monthlyRate
-            val amortization = fixedInstallment - interest
-            balance -= amortization
-            installments.add(
-                Installment(
-                    month = month,
-                    amortization = amortization,
-                    interest = interest,
-                    installment = fixedInstallment,
-                    remainingBalance = maxOf(0.0, balance),
-                    extraAmortization = 0.0
-                )
-            )
-        }
-        return installments
-    }
-
-    private fun List<Installment>.toSummary(system: AmortizationSystem): SimulationSummary {
-        val totalPaid = sumOf { it.installment + it.extraAmortization }
-        val totalInterest = sumOf { it.interest }
-        val totalAmortized = sumOf { it.amortization + it.extraAmortization }
-
-        return SimulationSummary(
+        val installmentsWithout = calculate(
+            loanAmount = loanAmount,
+            rate = rate,
+            terms = terms,
             system = system,
-            totalPaid = totalPaid.roundTwo(),
-            totalInterest = totalInterest.roundTwo(),
-            totalAmortized = totalAmortized.roundTwo(),
-            totalMonths = size
+            extraAmortizations = emptyMap(),
+            reduceTerm = false // baseline sempre com prazo completo
         )
-    }
 
-    private fun Double.roundTwo(): Double = (this * 100).roundToInt() / 100.0
+        val installmentsWith = calculate(
+            loanAmount = loanAmount,
+            rate = rate,
+            terms = terms,
+            system = system,
+            extraAmortizations = extraAmortizations,
+            reduceTerm = reduceTerm
+        )
+
+        val summaryWithout = installmentsWithout.toSummary(system)
+        val summaryWith = installmentsWith.toSummary(system)
+            .calculateSavingsComparedTo(summaryWithout)
+
+        return summaryWithout to summaryWith
+    }
 }
