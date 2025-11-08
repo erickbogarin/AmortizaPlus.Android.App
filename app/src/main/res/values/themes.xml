@@ -1,0 +1,7 @@
+<resources>
+    <!-- Tema neutro apenas para satisfazer o Manifest -->
+    <style name="Theme.AmortizaPlus" parent="android:Theme.Light.NoTitleBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+    </style>
+</resources>
