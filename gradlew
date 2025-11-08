@@ -44,7 +44,7 @@ APP_NAME="Gradle"
 APP_BASE_NAME=`basename "$0"`
 
 # Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m" "-Djava.net.preferIPv4Stack=true"'
 
 # Use the maximum available, or set MAX_FD != -1 to use that value.
 MAX_FD="maximum"
@@ -80,10 +80,22 @@ case "`uname`" in
     ;;
 esac
 
+# Determine the Java command to use to start the JVM.
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
+# Force Gradle user home into the project directory when not explicitly set.
+# This allows running the wrapper inside sandboxed environments that block writes to $HOME.
+if [ -z "$GRADLE_USER_HOME" ] ; then
+    GRADLE_USER_HOME="$APP_HOME/.gradle"
+    export GRADLE_USER_HOME
+fi
 
-# Determine the Java command to use to start the JVM.
+LOCAL_JDK="$APP_HOME/.jdk/jdk-17.0.11+9"
+if [ -z "$JAVA_HOME" ] && [ -d "$LOCAL_JDK" ] ; then
+    JAVA_HOME="$LOCAL_JDK"
+fi
+
+
 if [ -n "$JAVA_HOME" ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
         # IBM's JDK on AIX uses strange locations for the executables

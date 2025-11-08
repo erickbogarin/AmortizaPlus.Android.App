@@ -1,17 +1,9 @@
 package com.elab.amortizaplus.presentation.ui.screens.preview
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,37 +12,39 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.elab.amortizaplus.domain.calculator.FinancingCalculator
 import com.elab.amortizaplus.domain.model.AmortizationSystem
+import com.elab.amortizaplus.domain.model.InterestRate
 import java.text.NumberFormat
-import java.util.Locale
-import kotlin.math.pow
-
+import java.util.*
 
 @Composable
 fun SimulationPreviewScreen() {
     // --- Configurações base ---
     val loanAmount = 121_000.0
-    val annualRate = 0.13
+    val rate = InterestRate.Annual(0.13)
     val terms = 420
-    val amortizationMonth = 8
-    val extraAmortizationValue = 76_000.0
-    val formatCurrency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
 
-    val monthlyRate = (1 + annualRate).pow(1.0 / 12.0) - 1
+    // Duas amortizações extras para o preview
+    val extraAmortizations = mapOf(
+        8 to 76_000.0,
+        11 to 10_000.0
+    )
+
+    val formatCurrency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
     val calculator = FinancingCalculator()
 
     // --- Simulações ---
     val (summaryWithout, summaryWith) = calculator.compare(
         loanAmount = loanAmount,
-        monthlyRate = monthlyRate,
+        rate = rate,
         terms = terms,
         system = AmortizationSystem.SAC,
-        extraAmortizations = mapOf(amortizationMonth to extraAmortizationValue),
+        extraAmortizations = extraAmortizations,
         reduceTerm = true
     )
 
     val installmentsWithout = calculator.calculate(
         loanAmount = loanAmount,
-        monthlyRate = monthlyRate,
+        rate = rate,
         terms = terms,
         system = AmortizationSystem.SAC,
         reduceTerm = false
@@ -58,18 +52,19 @@ fun SimulationPreviewScreen() {
 
     val installmentsWith = calculator.calculate(
         loanAmount = loanAmount,
-        monthlyRate = monthlyRate,
+        rate = rate,
         terms = terms,
         system = AmortizationSystem.SAC,
-        extraAmortizations = mapOf(amortizationMonth to extraAmortizationValue),
+        extraAmortizations = extraAmortizations,
         reduceTerm = true
     )
 
-    println("FINANCING_LOG → Valor: R$ ${"%.2f".format(loanAmount)} | Taxa: ${(annualRate * 100)}% a.a.")
-    println("FINANCING_LOG → Amortização extra: R$ ${"%.2f".format(extraAmortizationValue)} no mês $amortizationMonth")
+    println("FINANCING_LOG → Valor: R$ ${"%.2f".format(loanAmount)} | Taxa: ${rate}")
+    println("FINANCING_LOG → Amortizações extras: ${extraAmortizations.entries.joinToString { "mês ${it.key} → R$ ${it.value}" }}")
     println("FINANCING_LOG → Sem amortização: ${installmentsWithout.size} parcelas")
     println("FINANCING_LOG → Com amortização: ${installmentsWith.size} parcelas")
-// --- Exibição ---
+
+    // --- Exibição ---
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
@@ -83,6 +78,7 @@ fun SimulationPreviewScreen() {
             Column(Modifier.padding(12.dp)) {
                 Text("📈 Resumo SEM amortização", fontWeight = FontWeight.Bold)
                 Text("Sistema: SAC")
+                Text("Taxa: ${rate}")
                 Text("Total Pago: ${formatCurrency.format(summaryWithout.totalPaid)}")
                 Text("Total de Juros: ${formatCurrency.format(summaryWithout.totalInterest)}")
                 Text("Total Amortizado: ${formatCurrency.format(summaryWithout.totalAmortized)}")
@@ -97,6 +93,7 @@ fun SimulationPreviewScreen() {
             Column(Modifier.padding(12.dp)) {
                 Text("📉 Resumo COM amortização", fontWeight = FontWeight.Bold)
                 Text("Sistema: SAC")
+                Text("Taxa: ${rate}")
                 Text("Total Pago: ${formatCurrency.format(summaryWith.totalPaid)}")
                 Text("Total de Juros: ${formatCurrency.format(summaryWith.totalInterest)}")
                 Text("Total Amortizado: ${formatCurrency.format(summaryWith.totalAmortized)}")
@@ -113,8 +110,10 @@ fun SimulationPreviewScreen() {
         Text("🎯 Economia de juros: ${formatCurrency.format(interestSavings)}", fontWeight = FontWeight.Bold)
         Text("⏳ Redução de prazo: $monthsSaved meses")
 
-        Spacer(Modifier.height(20.dp))
-// 📅 Primeiras parcelas (sem amortização)
+        Spacer(Modifier.height(24.dp))
+        Divider(Modifier.padding(vertical = 8.dp))
+
+        // 📅 Primeiras parcelas (sem amortização)
         Text("📆 Primeiras parcelas (sem amortização)", fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
 
@@ -135,7 +134,7 @@ fun SimulationPreviewScreen() {
             }
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 📅 Primeiras parcelas (com amortização)
         Text("📅 Primeiras parcelas (com amortização)", fontWeight = FontWeight.Bold)
@@ -153,13 +152,13 @@ fun SimulationPreviewScreen() {
                     Text("Amortização: ${formatCurrency.format(item.amortization)}")
                     Text("Juros: ${formatCurrency.format(item.interest)}")
                     Text("Parcela: ${formatCurrency.format(item.installment)}")
-                    if (item.extraAmortization > 0) {
+                    if (item.extraAmortization > 0)
                         Text("💰 Extra: ${formatCurrency.format(item.extraAmortization)}")
-                    }
                     Text("Saldo devedor: ${formatCurrency.format(item.remainingBalance)}")
                 }
             }
         }
+
         Spacer(Modifier.height(24.dp))
         Divider(Modifier.padding(vertical = 8.dp))
 

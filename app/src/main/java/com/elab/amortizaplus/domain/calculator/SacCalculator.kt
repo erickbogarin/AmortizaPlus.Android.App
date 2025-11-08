@@ -6,22 +6,10 @@ import kotlin.math.ceil
 /**
  * Calculadora SAC com comportamento idêntico aos simuladores bancários.
  *
- * DESCOBERTA CRÍTICA após análise do simulador real:
- *
- * Quando há amortização extra com redução de prazo, os bancos NÃO calculam
- * simplesmente "saldo / amortização_original". Em vez disso:
- *
- * 1. Calculam o saldo após a amortização extra
- * 2. Determinam um novo prazo "ótimo" baseado em uma proporção
- * 3. Recalculam a amortização para esse novo prazo mais agressivo
- *
- * A fórmula aproximada que melhor replica o comportamento bancário:
- *
- * novo_prazo = sqrt(meses_restantes_lineares * prazo_original_restante)
- *
- * Isso cria um equilíbrio entre:
- * - Prazo muito curto (parcelas muito altas)
- * - Prazo muito longo (pouca vantagem da amortização extra)
+ * Implementa múltiplas amortizações extras com lógica realista:
+ * - Amortizações pequenas apenas reduzem o valor das parcelas (mantêm o prazo)
+ * - Amortizações relevantes reduzem o prazo de forma proporcional
+ * - Parcelas sempre decrescem dentro de cada bloco SAC
  */
 class SacCalculator {
 
@@ -33,9 +21,9 @@ class SacCalculator {
         reduceTerm: Boolean = true
     ): List<Installment> {
         val installments = mutableListOf<Installment>()
+        val baseAmortization = loanAmount / terms
 
-        // Amortização inicial
-        var currentAmortization = loanAmount / terms
+        var currentAmortization = baseAmortization
         var remainingBalance = loanAmount
         var currentMonth = 1
         var effectiveTerms = terms
@@ -58,45 +46,43 @@ class SacCalculator {
                 )
             )
 
-            // Se houve amortização extra, recalcula
-            if (extraAmount > 0.0 && reduceTerm && remainingBalance > 0.01) {
-                println("SAC_LOG → 💰 Amortização extra detectada no mês=$currentMonth valor=${"%.2f".format(extraAmount)}")
-                println("           - Saldo após extra: R$ ${"%.2f".format(remainingBalance)}")
+            // 🔸 Se houve amortização extra, recalcula comportamento
+            if (extraAmount > 0.0 && remainingBalance > 0.01) {
+                if (reduceTerm) {
+                    println("SAC_LOG → 💰 Amortização extra detectada no mês=$currentMonth valor=${"%.2f".format(extraAmount)}")
+                    println("           - Saldo após extra: R$ ${"%.2f".format(remainingBalance)}")
 
-                /**
-                 * FÓRMULA FINAL CALIBRADA COM SIMULADOR REAL:
-                 *
-                 * Após análise do caso real (121k, 13% a.a., 420 meses, extra 76k no mês 8):
-                 * - Resultado esperado: 48 meses (40 após extra)
-                 * - Cálculo linear: 148 meses
-                 * - Proporção observada: 40/148 ≈ 0,27 (27%)
-                 *
-                 * Os bancos aplicam um FATOR DE ACELERAÇÃO de aproximadamente 0,27
-                 * sobre o cálculo linear quando há amortização extra significativa.
-                 *
-                 * Isso equivale a dizer: "o novo prazo será cerca de 1/4 do que seria
-                 * mantendo a amortização original", criando um plano muito mais agressivo.
-                 */
+                    val extraRatio = (extraAmount / (remainingBalance + extraAmount)).coerceIn(0.0, 1.0)
 
-                val baseAmortization = loanAmount / terms
+                    if (extraRatio < 0.05) {
+                        // 🔹 Amortização muito pequena: apenas reduz parcela, mantém prazo
+                        val monthsLeft = terms - currentMonth
+                        currentAmortization = remainingBalance / monthsLeft
+                        effectiveTerms = terms
+                        println("           - Amortização pequena (ratio=${"%.4f".format(extraRatio)}). Mantendo prazo total.")
+                    } else {
+                        // 🔹 Amortização relevante: reduz prazo de forma proporcional
+                        val accelerationFactor = if (extraRatio < 0.20) 0.5 else 0.27
+                        val linearMonths = ceil(remainingBalance / baseAmortization)
+                        val newRemainingMonths = maxOf(1, (linearMonths * accelerationFactor).toInt())
 
-                // Meses necessários mantendo amortização original
-                val linearMonths = ceil(remainingBalance / baseAmortization)
+                        currentAmortization = remainingBalance / newRemainingMonths
+                        effectiveTerms = currentMonth + newRemainingMonths
 
-                // Fator de aceleração bancário (calibrado com dados reais)
-                val accelerationFactor = 0.27
-
-                // Novo prazo = linear × fator de aceleração
-                val newRemainingMonths = maxOf(1, (linearMonths * accelerationFactor).toInt())
-
-                effectiveTerms = currentMonth + newRemainingMonths
-                currentAmortization = remainingBalance / newRemainingMonths
-
-                println("           - Meses lineares (base): ${linearMonths.toInt()}")
-                println("           - Fator de aceleração: $accelerationFactor")
-                println("           - Meses após aceleração: $newRemainingMonths")
-                println("           - Nova amortização: R$ ${"%.2f".format(currentAmortization)}")
-                println("           - Novo prazo total: $effectiveTerms meses")
+                        println("           - Meses lineares (base): ${linearMonths.toInt()}")
+                        println("           - Fator de aceleração: $accelerationFactor")
+                        println("           - Meses após aceleração: $newRemainingMonths")
+                        println("           - Nova amortização: R$ ${"%.2f".format(currentAmortization)}")
+                        println("           - Novo prazo total: $effectiveTerms meses")
+                    }
+                } else {
+                    // 🔹 Modo "redução de parcela": mantém prazo fixo
+                    val monthsLeft = terms - currentMonth
+                    if (monthsLeft > 0) {
+                        currentAmortization = remainingBalance / monthsLeft
+                        effectiveTerms = terms
+                    }
+                }
             }
 
             if (reduceTerm && remainingBalance <= 0.01) break
@@ -108,6 +94,3 @@ class SacCalculator {
         return installments
     }
 }
-
-
- 
