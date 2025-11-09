@@ -81,4 +81,59 @@ class PriceCalculatorTest {
         assertTrue("Deve quitar em menos de 100 parcelas", installments.size < 100)
         assertTrue(installments.isFullyPaid())
     }
+
+    @Test
+    fun `price deve lidar com taxa muito baixa`() {
+        val rate = (1 + 0.0001).pow(1.0 / 12.0) - 1
+        val installments = calculator.calculate(loanAmount = 100_000.0, monthlyRate = rate, terms = 360)
+        assertTrue(installments.isFullyPaid())
+        assertEquals(360, installments.size)
+    }
+
+    @Test
+    fun `price deve lidar com taxa muito alta`() {
+        val rate = (1 + 0.5).pow(1.0 / 12.0) - 1 // 50% a.a.
+        val installments = calculator.calculate(loanAmount = 100_000.0, monthlyRate = rate, terms = 60)
+        assertTrue(installments.isFullyPaid())
+        assertEquals(60, installments.size)
+    }
+
+    @Test
+    fun `amortizacao tardia deve reduzir saldo final sem quebrar loop`() {
+        val installments = calculator.calculate(
+            loanAmount = 200_000.0,
+            monthlyRate = monthlyRate,
+            terms = 240,
+            extraAmortizations = mapOf(200 to ExtraAmortizationInput(20_000.0, reduceTerm = true))
+        )
+        assertTrue(installments.isFullyPaid())
+        assertTrue(installments.size <= 240)
+    }
+
+    @Test
+    fun `pequenos saldos residuais devem ser quitados corretamente`() {
+        val installments = calculator.calculate(
+            loanAmount = 100.0,
+            monthlyRate = monthlyRate,
+            terms = 12
+        )
+        assertTrue(installments.isFullyPaid())
+        assertEquals(12, installments.size)
+    }
+
+    @Test
+    fun `reduce term seguido de reduce payment deve manter coerencia`() {
+        val extras = mapOf(
+            6 to ExtraAmortizationInput(30_000.0, reduceTerm = true),
+            18 to ExtraAmortizationInput(10_000.0, reduceTerm = false)
+        )
+        val installments = calculator.calculate(
+            loanAmount = 150_000.0,
+            monthlyRate = monthlyRate,
+            terms = 240,
+            extraAmortizations = extras
+        )
+        assertTrue(installments.isFullyPaid())
+        assertTrue(installments.size < 240)
+    }
 }
