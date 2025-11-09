@@ -1,5 +1,7 @@
 package com.elab.amortizaplus.domain.util
 
+import java.util.logging.Logger
+
 /**
  * Logger condicional para cálculos.
  * Centraliza logs de debug e permite desabilitar facilmente em produção.
@@ -7,10 +9,11 @@ package com.elab.amortizaplus.domain.util
 object CalculationLogger {
 
     private const val ENABLE_LOGS = false // Toggle para desenvolvimento
+    private val logger: Logger = Logger.getLogger("AmortizaPlusCalculator")
 
     fun log(tag: String, message: String) {
         if (ENABLE_LOGS) {
-            println("$tag → $message")
+            logger.info("$tag → $message")
         }
     }
 

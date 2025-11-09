@@ -17,10 +17,9 @@ class SacCalculatorMultipleAmortizationsTest {
             monthlyRate = rate,
             terms = 420,
             extraAmortizations = mapOf(
-                8 to 76_000.0,
-                16 to 10_000.0
-            ),
-            reduceTerm = true
+                8 to ExtraAmortizationInput(76_000.0, reduceTerm = true),
+                16 to ExtraAmortizationInput(10_000.0, reduceTerm = true)
+            )
         )
 
         // ✅ 1. Aplicação da amortização extra
@@ -31,14 +30,16 @@ class SacCalculatorMultipleAmortizationsTest {
         assertEquals(10_000.0, month16.extraAmortization, 0.01)
 
         // ✅ 2. Parcela decrescente (característica SAC)
-        assert(result.first().installment > result.last().installment) {
-            "Parcelas devem ser decrescentes no SAC"
-        }
+        assertTrue(
+            "Parcelas devem ser decrescentes no SAC",
+            result.first().installment > result.last().installment
+        )
 
         // ✅ 3. Prazo dentro do esperado
-        assert(result.size in 36..38) {
-            "Prazo esperado entre 36 e 38 meses, obtido: ${result.size}"
-        }
+        assertTrue(
+            "Prazo esperado entre 36 e 38 meses, obtido: ${result.size}",
+            result.size in 36..38
+        )
 
         // ✅ 4. Saldo final quitado
         assertEquals(0.0, result.last().remainingBalance, 0.01)
@@ -54,10 +55,9 @@ class SacCalculatorMultipleAmortizationsTest {
             monthlyRate = rate,
             terms = 420,
             extraAmortizations = mapOf(
-                8 to 76_000.0,
-                16 to 10_000.0
-            ),
-            reduceTerm = false
+                8 to ExtraAmortizationInput(76_000.0, reduceTerm = false),
+                16 to ExtraAmortizationInput(10_000.0, reduceTerm = false)
+            )
         )
 
         // ✅ 1. O número de parcelas deve continuar o mesmo (não reduz prazo)
@@ -92,17 +92,14 @@ class SacCalculatorMultipleAmortizationsTest {
             monthlyRate = rate,
             terms = 420,
             extraAmortizations = mapOf(
-                12 to 1_000.0,  // amortização leve no mês 12
-                24 to 500.0,    // amortização ainda menor
-                36 to 1_500.0   // outra pequena amortização
-            ),
-            reduceTerm = true
+                12 to ExtraAmortizationInput(1_000.0, reduceTerm = true),
+                24 to ExtraAmortizationInput(500.0, reduceTerm = true),
+                36 to ExtraAmortizationInput(1_500.0, reduceTerm = true)
+            )
         )
 
         val prazoObtido = result.size
         val reducao = 420 - prazoObtido
-
-        println("🧮 Prazo obtido: $prazoObtido meses (redução de $reducao meses)")
 
         // ✅ 1. Deve continuar próximo de 420 meses (sem redução exagerada)
         assertTrue(

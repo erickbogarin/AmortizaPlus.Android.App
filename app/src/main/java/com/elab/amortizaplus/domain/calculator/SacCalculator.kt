@@ -4,7 +4,9 @@ import com.elab.amortizaplus.domain.model.Installment
 import com.elab.amortizaplus.domain.util.CalculationLogger
 import com.elab.amortizaplus.domain.util.MathUtils.isEffectivelyZero
 import com.elab.amortizaplus.domain.util.MathUtils.nonNegative
+import com.elab.amortizaplus.domain.util.MathUtils.roundTwo
 import kotlin.math.ceil
+import kotlin.math.min
 
 /**
  * Calculadora SAC com comportamento idêntico aos simuladores bancários.
@@ -27,8 +29,7 @@ class SacCalculator {
         loanAmount: Double,
         monthlyRate: Double,
         terms: Int,
-        extraAmortizations: Map<Int, Double> = emptyMap(),
-        reduceTerm: Boolean = true
+        extraAmortizations: Map<Int, ExtraAmortizationInput> = emptyMap()
     ): List<Installment> {
         val installments = mutableListOf<Installment>()
         val baseAmortization = loanAmount / terms
@@ -39,22 +40,33 @@ class SacCalculator {
         var effectiveTerms = terms
 
         while (currentMonth <= effectiveTerms && !remainingBalance.isEffectivelyZero()) {
-            val interest = remainingBalance * monthlyRate
-            val installmentValue = currentAmortization + interest
-            val extraAmount = extraAmortizations[currentMonth] ?: 0.0
+            val extraInput = extraAmortizations[currentMonth]
+            val appliedReduceTerm = extraInput?.reduceTerm ?: true
+            val requestedExtra = extraInput?.amount ?: 0.0
 
-            remainingBalance -= (currentAmortization + extraAmount)
-            remainingBalance = remainingBalance.nonNegative()
+            val rawInterest = remainingBalance * monthlyRate
+            val interest = rawInterest.roundTwo()
+            val amortizationRaw = min(currentAmortization, remainingBalance)
+            var balanceAfterAmortization = (remainingBalance - amortizationRaw).nonNegative()
 
-            // 🔹 Detecção antecipada de quitação total
-            // Evita gerar terceira parcela "fantasma" após amortização total no mês 1 ou 2
-            if (remainingBalance.isEffectivelyZero() ||
-                (extraAmount > 0 && remainingBalance / loanAmount < 0.0001)
+            var extraRaw = 0.0
+            if (requestedExtra > 0.0) {
+                extraRaw = min(requestedExtra, balanceAfterAmortization)
+                balanceAfterAmortization -= extraRaw
+            }
+
+            val amortization = amortizationRaw.roundTwo()
+            val extraAmount = extraRaw.roundTwo()
+            val installmentValue = (amortizationRaw + rawInterest).roundTwo()
+            val displayedBalance = balanceAfterAmortization.roundTwo()
+
+            if (displayedBalance.isEffectivelyZero() ||
+                (extraAmount > 0 && displayedBalance / loanAmount < 0.0001)
             ) {
                 installments.add(
                     Installment(
                         month = currentMonth,
-                        amortization = currentAmortization,
+                        amortization = amortization,
                         interest = interest,
                         installment = installmentValue,
                         remainingBalance = 0.0,
@@ -69,27 +81,28 @@ class SacCalculator {
             installments.add(
                 Installment(
                     month = currentMonth,
-                    amortization = currentAmortization,
+                    amortization = amortization,
                     interest = interest,
                     installment = installmentValue,
-                    remainingBalance = remainingBalance,
+                    remainingBalance = displayedBalance,
                     extraAmortization = extraAmount
                 )
             )
 
-            // 🔸 Após amortização extra significativa, recalcula o comportamento
+            remainingBalance = balanceAfterAmortization
+
             if (extraAmount > 0.0) {
                 val recalculation = recalculateAfterExtraAmortization(
                     extraAmount = extraAmount,
                     remainingBalance = remainingBalance,
                     baseAmortization = baseAmortization,
                     currentMonth = currentMonth,
-                    originalTerms = terms,
-                    reduceTerm = reduceTerm
+                    currentEffectiveTerms = effectiveTerms,
+                    reduceTerm = appliedReduceTerm
                 )
 
                 currentAmortization = recalculation.newAmortization
-                effectiveTerms = recalculation.newEffectiveTerms
+                effectiveTerms = min(effectiveTerms, recalculation.newEffectiveTerms)
             }
 
             currentMonth++
@@ -108,7 +121,7 @@ class SacCalculator {
         remainingBalance: Double,
         baseAmortization: Double,
         currentMonth: Int,
-        originalTerms: Int,
+        currentEffectiveTerms: Int,
         reduceTerm: Boolean
     ): RecalculationResult {
         CalculationLogger.logExtraAmortization(currentMonth, extraAmount, remainingBalance)
@@ -121,13 +134,14 @@ class SacCalculator {
                 extraRatio = extraRatio,
                 remainingBalance = remainingBalance,
                 baseAmortization = baseAmortization,
-                currentMonth = currentMonth
+                currentMonth = currentMonth,
+                currentEffectiveTerms = currentEffectiveTerms
             )
         } else {
             calculatePaymentReduction(
                 remainingBalance = remainingBalance,
                 currentMonth = currentMonth,
-                originalTerms = originalTerms
+                currentEffectiveTerms = currentEffectiveTerms
             )
         }
     }
@@ -139,13 +153,15 @@ class SacCalculator {
         extraRatio: Double,
         remainingBalance: Double,
         baseAmortization: Double,
-        currentMonth: Int
+        currentMonth: Int,
+        currentEffectiveTerms: Int
     ): RecalculationResult {
         if (extraRatio < SMALL_AMORTIZATION_THRESHOLD) {
             // Amortização muito pequena: mantém prazo original
+            val monthsLeft = (currentEffectiveTerms - currentMonth).coerceAtLeast(1)
             return RecalculationResult(
-                newAmortization = remainingBalance / (420 - currentMonth),
-                newEffectiveTerms = 420
+                newAmortization = remainingBalance / monthsLeft,
+                newEffectiveTerms = currentEffectiveTerms
             )
         }
 
@@ -158,7 +174,8 @@ class SacCalculator {
         val linearMonths = ceil(remainingBalance / baseAmortization).toInt()
         val acceleratedMonths = maxOf(1, (linearMonths * accelerationFactor).toInt())
         val newAmortization = remainingBalance / acceleratedMonths
-        val newEffectiveTerms = currentMonth + acceleratedMonths
+        val candidateTerms = currentMonth + acceleratedMonths
+        val newEffectiveTerms = min(currentEffectiveTerms, candidateTerms)
 
         CalculationLogger.logReduction(
             extraRatio = extraRatio,
@@ -177,9 +194,9 @@ class SacCalculator {
     private fun calculatePaymentReduction(
         remainingBalance: Double,
         currentMonth: Int,
-        originalTerms: Int
+        currentEffectiveTerms: Int
     ): RecalculationResult {
-        val monthsLeft = originalTerms - currentMonth
+        val monthsLeft = (currentEffectiveTerms - currentMonth).coerceAtLeast(1)
         val newAmortization = if (monthsLeft > 0) {
             remainingBalance / monthsLeft
         } else {
@@ -188,7 +205,7 @@ class SacCalculator {
 
         return RecalculationResult(
             newAmortization = newAmortization,
-            newEffectiveTerms = originalTerms
+            newEffectiveTerms = currentEffectiveTerms
         )
     }
 

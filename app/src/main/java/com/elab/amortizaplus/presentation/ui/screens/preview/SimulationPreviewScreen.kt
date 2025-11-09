@@ -1,5 +1,6 @@
 package com.elab.amortizaplus.presentation.ui.screens.preview
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,11 +11,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.elab.amortizaplus.domain.calculator.ExtraAmortizationInput
 import com.elab.amortizaplus.domain.calculator.FinancingCalculator
 import com.elab.amortizaplus.domain.model.AmortizationSystem
 import com.elab.amortizaplus.domain.model.InterestRate
 import java.text.NumberFormat
 import java.util.*
+
+private const val PREVIEW_LOG_TAG = "SimulationPreview"
 
 @Composable
 fun SimulationPreviewScreen() {
@@ -25,8 +29,8 @@ fun SimulationPreviewScreen() {
 
     // Duas amortizações extras para o preview
     val extraAmortizations = mapOf(
-        8 to 76_000.0,
-        11 to 10_000.0
+        8 to ExtraAmortizationInput(amount = 76_000.0, reduceTerm = true),
+        11 to ExtraAmortizationInput(amount = 10_000.0, reduceTerm = true)
     )
 
     val formatCurrency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
@@ -38,16 +42,14 @@ fun SimulationPreviewScreen() {
         rate = rate,
         terms = terms,
         system = AmortizationSystem.SAC,
-        extraAmortizations = extraAmortizations,
-        reduceTerm = true
+        extraAmortizations = extraAmortizations
     )
 
     val installmentsWithout = calculator.calculate(
         loanAmount = loanAmount,
         rate = rate,
         terms = terms,
-        system = AmortizationSystem.SAC,
-        reduceTerm = false
+        system = AmortizationSystem.SAC
     )
 
     val installmentsWith = calculator.calculate(
@@ -55,14 +57,18 @@ fun SimulationPreviewScreen() {
         rate = rate,
         terms = terms,
         system = AmortizationSystem.SAC,
-        extraAmortizations = extraAmortizations,
-        reduceTerm = true
+        extraAmortizations = extraAmortizations
     )
 
-    println("FINANCING_LOG → Valor: R$ ${"%.2f".format(loanAmount)} | Taxa: ${rate}")
-    println("FINANCING_LOG → Amortizações extras: ${extraAmortizations.entries.joinToString { "mês ${it.key} → R$ ${it.value}" }}")
-    println("FINANCING_LOG → Sem amortização: ${installmentsWithout.size} parcelas")
-    println("FINANCING_LOG → Com amortização: ${installmentsWith.size} parcelas")
+    Log.d(PREVIEW_LOG_TAG, "Valor: R$ ${"%.2f".format(loanAmount)} | Taxa: $rate")
+    Log.d(
+        PREVIEW_LOG_TAG,
+        "Amortizações extras: ${
+            extraAmortizations.entries.joinToString { "mês ${it.key} → R$ ${"%.2f".format(it.value.amount)}" }
+        }"
+    )
+    Log.d(PREVIEW_LOG_TAG, "Sem amortização: ${installmentsWithout.size} parcelas")
+    Log.d(PREVIEW_LOG_TAG, "Com amortização: ${installmentsWith.size} parcelas")
 
     // --- Exibição ---
     Column(

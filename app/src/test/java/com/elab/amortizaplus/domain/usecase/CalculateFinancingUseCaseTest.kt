@@ -3,7 +3,9 @@ package com.elab.amortizaplus.domain.usecase
 import com.elab.amortizaplus.domain.model.AmortizationSystem
 import com.elab.amortizaplus.domain.model.ExtraAmortization
 import com.elab.amortizaplus.domain.model.ExtraAmortizationStrategy
+import com.elab.amortizaplus.domain.model.InterestRateType
 import com.elab.amortizaplus.domain.model.Simulation
+import kotlin.math.pow
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -85,12 +87,13 @@ class CalculateFinancingUseCaseTest {
         val simulation = Simulation(
             loanAmount = 121_000.0,
             interestRate = 0.13,
+            rateType = InterestRateType.ANNUAL,
             terms = 420,
             startDate = "2025-01-01",
             amortizationSystem = AmortizationSystem.SAC,
             extraAmortizations = listOf(
                 ExtraAmortization(8, 76_000.0, ExtraAmortizationStrategy.REDUCE_TERM),
-                ExtraAmortization(16, 10_000.0, ExtraAmortizationStrategy.REDUCE_TERM)
+                ExtraAmortization(16, 10_000.0, ExtraAmortizationStrategy.REDUCE_PAYMENT)
             ),
             name = "Múltiplas Amortizações"
         )
@@ -104,9 +107,10 @@ class CalculateFinancingUseCaseTest {
         assertEquals(76_000.0, month8.extraAmortization, 0.01)
         assertEquals(10_000.0, month16.extraAmortization, 0.01)
 
-        // Prazo deve estar significativamente reduzido
+        // Prazo deve estar reduzido por conta da primeira amortização
         val reduction = result.summaryWithoutExtra.totalMonths - result.summaryWithExtra.totalMonths
         assertTrue("Redução deve ser >= 300 meses (foi $reduction)", reduction >= 300)
+
     }
 
     @Test
@@ -164,6 +168,7 @@ class CalculateFinancingUseCaseTest {
         val simulation = Simulation(
             loanAmount = 150_000.0,
             interestRate = 0.135,
+            rateType = InterestRateType.MONTHLY,
             terms = 300,
             startDate = "2025-06-01",
             amortizationSystem = AmortizationSystem.SAC,
@@ -179,5 +184,65 @@ class CalculateFinancingUseCaseTest {
         assertEquals(simulation.startDate, result.simulation.startDate)
         assertEquals(simulation.amortizationSystem, result.simulation.amortizationSystem)
         assertEquals(simulation.name, result.simulation.name)
+        assertEquals(simulation.rateType, result.simulation.rateType)
+    }
+
+    @Test
+    fun `estrategia reduce payment deve manter prazo no sistema PRICE`() {
+        val simulation = Simulation(
+            loanAmount = 90_000.0,
+            interestRate = 0.11,
+            rateType = InterestRateType.ANNUAL,
+            terms = 240,
+            startDate = "2025-01-01",
+            amortizationSystem = AmortizationSystem.PRICE,
+            extraAmortizations = listOf(
+                ExtraAmortization(12, 20_000.0, ExtraAmortizationStrategy.REDUCE_PAYMENT)
+            ),
+            name = "PRICE Reduce Payment"
+        )
+
+        val result = useCase(simulation)
+        val payments = result.paymentsWithExtra
+        val installmentBefore = payments.first { it.month == 12 }.installment
+        val installmentAfter = payments.first { it.month == 13 }.installment
+
+        assertEquals(simulation.terms, payments.size)
+        assertTrue(installmentAfter < installmentBefore)
+    }
+
+    @Test
+    fun `taxa mensal deve ser utilizada sem reconversao indevida`() {
+        val monthlyRate = 0.01
+        val simulationMonthly = Simulation(
+            loanAmount = 80_000.0,
+            interestRate = monthlyRate,
+            rateType = InterestRateType.MONTHLY,
+            terms = 180,
+            startDate = "2025-01-01",
+            amortizationSystem = AmortizationSystem.PRICE,
+            extraAmortizations = emptyList(),
+            name = "Mensal"
+        )
+
+        val simulationAnnualEquiv = Simulation(
+            loanAmount = 80_000.0,
+            interestRate = (1 + monthlyRate).pow(12.0) - 1,
+            rateType = InterestRateType.ANNUAL,
+            terms = 180,
+            startDate = "2025-01-01",
+            amortizationSystem = AmortizationSystem.PRICE,
+            extraAmortizations = emptyList(),
+            name = "Anual Equivalente"
+        )
+
+        val resultMonthly = useCase(simulationMonthly)
+        val resultAnnual = useCase(simulationAnnualEquiv)
+
+        assertEquals(
+            resultAnnual.paymentsWithoutExtra.first().installment,
+            resultMonthly.paymentsWithoutExtra.first().installment,
+            0.01
+        )
     }
 }

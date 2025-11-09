@@ -1,6 +1,6 @@
 package com.elab.amortizaplus.domain.model
 
-import com.elab.amortizaplus.domain.util.MathUtils.roundToTwoDecimals
+import com.elab.amortizaplus.domain.util.MathUtils.roundTwo
 
 /**
  * Extensions para List<Installment> que centralizam cálculos de resumo.
@@ -11,15 +11,15 @@ import com.elab.amortizaplus.domain.util.MathUtils.roundToTwoDecimals
  * Converte uma lista de parcelas em resumo financeiro.
  */
 fun List<Installment>.toSummary(system: AmortizationSystem? = null): SimulationSummary {
-    val totalPaid = sumOf { it.installment + it.extraAmortization }
+    val totalPaid = sumOf { it.installment }
     val totalInterest = sumOf { it.interest }
     val totalAmortized = sumOf { it.amortization + it.extraAmortization }
 
     return SimulationSummary(
         system = system,
-        totalPaid = totalPaid.roundToTwoDecimals(),
-        totalInterest = totalInterest.roundToTwoDecimals(),
-        totalAmortized = totalAmortized.roundToTwoDecimals(),
+        totalPaid = totalPaid.roundTwo(),
+        totalInterest = totalInterest.roundTwo(),
+        totalAmortized = totalAmortized.roundTwo(),
         totalMonths = size
     )
 }
@@ -33,7 +33,7 @@ fun SimulationSummary.calculateSavingsComparedTo(baseline: SimulationSummary): S
 
     return this.copy(
         reducedMonths = reducedMonths,
-        interestSavings = interestSavings.roundToTwoDecimals()
+        interestSavings = interestSavings.roundTwo()
     )
 }
 

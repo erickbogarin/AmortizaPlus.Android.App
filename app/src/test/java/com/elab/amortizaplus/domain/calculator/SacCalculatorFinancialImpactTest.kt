@@ -4,7 +4,6 @@ import org.junit.Test
 import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
 import kotlin.math.pow
-import kotlin.math.round
 
 /**
  * Teste de impacto financeiro total:
@@ -29,8 +28,7 @@ class SacCalculatorFinancialImpactTest {
             loanAmount = loanAmount,
             monthlyRate = monthlyRate,
             terms = terms,
-            extraAmortizations = emptyMap(),
-            reduceTerm = false
+            extraAmortizations = emptyMap()
         )
 
         val totalBasePaid = base.sumOf { it.installment }
@@ -42,22 +40,13 @@ class SacCalculatorFinancialImpactTest {
             monthlyRate = monthlyRate,
             terms = terms,
             extraAmortizations = mapOf(
-                8 to 76_000.0,
-                16 to 10_000.0
-            ),
-            reduceTerm = true
+                8 to ExtraAmortizationInput(76_000.0, reduceTerm = true),
+                16 to ExtraAmortizationInput(10_000.0, reduceTerm = true)
+            )
         )
 
         val totalWithPaid = withAmort.sumOf { it.installment }
         val totalWithInterest = withAmort.sumOf { it.interest }
-
-        println("💰 Total pago sem amortização: R$ ${"%.2f".format(totalBasePaid)}")
-        println("💰 Total pago com amortização: R$ ${"%.2f".format(totalWithPaid)}")
-        println("📉 Redução total: R$ ${"%.2f".format(totalBasePaid - totalWithPaid)}")
-        println("💸 Juros sem amortização: R$ ${"%.2f".format(totalBaseInterest)}")
-        println("💸 Juros com amortização: R$ ${"%.2f".format(totalWithInterest)}")
-        println("📆 Prazo sem amortização: ${base.size} meses")
-        println("📆 Prazo com amortização: ${withAmort.size} meses")
 
         // 🔍 Verificações principais
         assertTrue(
@@ -95,17 +84,12 @@ class SacCalculatorFinancialImpactTest {
             monthlyRate = monthlyRate,
             terms = terms,
             extraAmortizations = mapOf(
-                12 to 1_000.0,
-                24 to 500.0,
-                36 to 1_500.0
-            ),
-            reduceTerm = true
+                12 to ExtraAmortizationInput(1_000.0, reduceTerm = true),
+                24 to ExtraAmortizationInput(500.0, reduceTerm = true),
+                36 to ExtraAmortizationInput(1_500.0, reduceTerm = true)
+            )
         )
         val totalWithInterest = withSmallAmort.sumOf { it.interest }
-
-        println("💸 Juros sem amortização: R$ ${"%.2f".format(totalBaseInterest)}")
-        println("💸 Juros com pequenas amortizações: R$ ${"%.2f".format(totalWithInterest)}")
-        println("📉 Redução de juros: R$ ${"%.2f".format(totalBaseInterest - totalWithInterest)}")
 
         // Deve haver economia leve, mas não desproporcional
         assertTrue(

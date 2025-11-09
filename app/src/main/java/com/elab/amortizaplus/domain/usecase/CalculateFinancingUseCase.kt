@@ -1,7 +1,10 @@
 package com.elab.amortizaplus.domain.usecase
 
+import com.elab.amortizaplus.domain.calculator.ExtraAmortizationInput
 import com.elab.amortizaplus.domain.calculator.FinancingCalculator
 import com.elab.amortizaplus.domain.model.InterestRate
+import com.elab.amortizaplus.domain.model.InterestRateType
+import com.elab.amortizaplus.domain.model.Installment
 import com.elab.amortizaplus.domain.model.Simulation
 import com.elab.amortizaplus.domain.model.SimulationResult
 import com.elab.amortizaplus.domain.model.calculateSavingsComparedTo
@@ -18,27 +21,22 @@ class CalculateFinancingUseCase(
 ) {
 
     operator fun invoke(simulation: Simulation): SimulationResult {
-        val rate = InterestRate.Annual(simulation.interestRate)
+        val rate = when (simulation.rateType) {
+            InterestRateType.ANNUAL -> InterestRate.Annual(simulation.interestRate)
+            InterestRateType.MONTHLY -> InterestRate.Monthly(simulation.interestRate)
+        }
         val extrasMap = buildExtrasMap(simulation)
 
-        // Cenário sem amortizações (baseline)
-        val paymentsWithoutExtra = financingCalculator.calculate(
-            loanAmount = simulation.loanAmount,
+        val paymentsWithoutExtra = runScenario(
+            simulation = simulation,
             rate = rate,
-            terms = simulation.terms,
-            system = simulation.amortizationSystem,
-            extraAmortizations = emptyMap(),
-            reduceTerm = false
+            extras = emptyMap()
         )
 
-        // Cenário com amortizações
-        val paymentsWithExtra = financingCalculator.calculate(
-            loanAmount = simulation.loanAmount,
+        val paymentsWithExtra = runScenario(
+            simulation = simulation,
             rate = rate,
-            terms = simulation.terms,
-            system = simulation.amortizationSystem,
-            extraAmortizations = extrasMap,
-            reduceTerm = true // assumimos redução de prazo como padrão
+            extras = extrasMap
         )
 
         // Gera resumos
@@ -58,6 +56,23 @@ class CalculateFinancingUseCase(
     /**
      * Converte lista de ExtraAmortization em Map<Int, Double>.
      */
-    private fun buildExtrasMap(simulation: Simulation): Map<Int, Double> =
-        simulation.extraAmortizations.associate { it.month to it.amount }
+    private fun runScenario(
+        simulation: Simulation,
+        rate: InterestRate,
+        extras: Map<Int, ExtraAmortizationInput>
+    ): List<Installment> = financingCalculator.calculate(
+        loanAmount = simulation.loanAmount,
+        rate = rate,
+        terms = simulation.terms,
+        system = simulation.amortizationSystem,
+        extraAmortizations = extras
+    )
+
+    /**
+     * Converte lista de ExtraAmortization em Map<Int, ExtraAmortizationInput>.
+     */
+    private fun buildExtrasMap(simulation: Simulation): Map<Int, ExtraAmortizationInput> =
+        simulation.extraAmortizations.associate { extra ->
+            extra.month to ExtraAmortizationInput.from(extra)
+        }
 }

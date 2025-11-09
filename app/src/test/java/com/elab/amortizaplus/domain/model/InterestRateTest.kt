@@ -58,4 +58,22 @@ class InterestRateTest {
         val monthlyZero = InterestRate.Monthly(0.0)
         assertEquals(0.0, monthlyZero.asAnnual(), 0.0)
     }
+
+    @Test
+    fun `taxa anual alta deve manter precisao ao converter`() {
+        val annual = InterestRate.Annual(0.30)
+        val monthly = annual.asMonthly()
+        val backToAnnual = InterestRate.Monthly(monthly).asAnnual()
+
+        assertEquals(0.30, backToAnnual, 0.0001)
+    }
+
+    @Test
+    fun `taxa mensal pequena deve converter para anual sem perda significativa`() {
+        val monthly = InterestRate.Monthly(0.0025)
+        val annual = monthly.asAnnual()
+        val expected = (1 + 0.0025).pow(12) - 1
+
+        assertEquals(expected, annual, 0.00001)
+    }
 }

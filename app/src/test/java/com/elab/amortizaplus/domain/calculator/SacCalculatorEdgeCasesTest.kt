@@ -91,8 +91,7 @@ class SacCalculatorEdgeCasesTest {
             loanAmount = loanAmount,
             monthlyRate = standardRate.asMonthly(),
             terms = 360,
-            extraAmortizations = mapOf(1 to loanAmount),
-            reduceTerm = true
+            extraAmortizations = mapOf(1 to ExtraAmortizationInput(loanAmount, reduceTerm = true))
         )
 
         assertTrue(
@@ -112,8 +111,7 @@ class SacCalculatorEdgeCasesTest {
             loanAmount = loanAmount,
             monthlyRate = standardRate.asMonthly(),
             terms = 360,
-            extraAmortizations = mapOf(2 to balanceAfterMonth1),
-            reduceTerm = true
+            extraAmortizations = mapOf(2 to ExtraAmortizationInput(balanceAfterMonth1, reduceTerm = true))
         )
 
         assertEquals("Deve gerar exatamente 2 parcelas", 2, result.size)
@@ -127,12 +125,11 @@ class SacCalculatorEdgeCasesTest {
             monthlyRate = standardRate.asMonthly(),
             terms = 420,
             extraAmortizations = mapOf(
-                12 to 100.0,
-                24 to 150.0,
-                36 to 200.0,
-                48 to 50.0
-            ),
-            reduceTerm = true
+                12 to ExtraAmortizationInput(100.0, reduceTerm = true),
+                24 to ExtraAmortizationInput(150.0, reduceTerm = true),
+                36 to ExtraAmortizationInput(200.0, reduceTerm = true),
+                48 to ExtraAmortizationInput(50.0, reduceTerm = true)
+            )
         )
 
         // Deve manter prazo próximo do original
@@ -148,8 +145,7 @@ class SacCalculatorEdgeCasesTest {
             loanAmount = 100_000.0,
             monthlyRate = standardRate.asMonthly(),
             terms = 120,
-            extraAmortizations = mapOf(120 to 10_000.0),
-            reduceTerm = false
+            extraAmortizations = mapOf(120 to ExtraAmortizationInput(10_000.0, reduceTerm = false))
         )
 
         assertEquals(120, result.size)

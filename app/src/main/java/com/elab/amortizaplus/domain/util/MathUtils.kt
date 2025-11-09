@@ -9,10 +9,10 @@ import kotlin.math.roundToInt
 object MathUtils {
 
     /**
-     * Arredonda um Double para 2 casas decimais.
-     * Usado em valores monetários para evitar problemas de precisão.
+     * Arredonda valores monetários para 2 casas decimais.
+     * Mantém consistência em todos os cálculos financeiros.
      */
-    fun Double.roundToTwoDecimals(): Double =
+    fun Double.roundTwo(): Double =
         (this * 100).roundToInt() / 100.0
 
     /**

@@ -3,6 +3,7 @@
 .jdk/
 /local.properties
 /.idea/caches
+/.idea/*.xml
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml

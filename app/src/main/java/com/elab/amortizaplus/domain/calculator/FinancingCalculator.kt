@@ -6,9 +6,6 @@ import com.elab.amortizaplus.domain.model.InterestRate
 import com.elab.amortizaplus.domain.model.SimulationSummary
 import com.elab.amortizaplus.domain.model.calculateSavingsComparedTo
 import com.elab.amortizaplus.domain.model.toSummary
-import com.elab.amortizaplus.domain.util.MathUtils.nonNegative
-import kotlin.math.pow
-
 /**
  * Calculadora principal de financiamento.
  * Orquestra SAC e PRICE, delegando para calculadoras especializadas.
@@ -26,8 +23,7 @@ class FinancingCalculator(
         rate: InterestRate,
         terms: Int,
         system: AmortizationSystem,
-        extraAmortizations: Map<Int, Double> = emptyMap(),
-        reduceTerm: Boolean = true
+        extraAmortizations: Map<Int, ExtraAmortizationInput> = emptyMap()
     ): List<Installment> {
         val monthlyRate = rate.asMonthly()
 
@@ -36,15 +32,13 @@ class FinancingCalculator(
                 loanAmount = loanAmount,
                 monthlyRate = monthlyRate,
                 terms = terms,
-                extraAmortizations = extraAmortizations,
-                reduceTerm = reduceTerm
+                extraAmortizations = extraAmortizations
             )
             AmortizationSystem.PRICE -> priceCalculator.calculate(
                 loanAmount = loanAmount,
                 monthlyRate = monthlyRate,
                 terms = terms,
-                extraAmortizations = extraAmortizations,
-                reduceTerm = reduceTerm
+                extraAmortizations = extraAmortizations
             )
         }
     }
@@ -58,16 +52,14 @@ class FinancingCalculator(
         rate: InterestRate,
         terms: Int,
         system: AmortizationSystem,
-        extraAmortizations: Map<Int, Double> = emptyMap(),
-        reduceTerm: Boolean = true
+        extraAmortizations: Map<Int, ExtraAmortizationInput> = emptyMap()
     ): Pair<SimulationSummary, SimulationSummary> {
         val installmentsWithout = calculate(
             loanAmount = loanAmount,
             rate = rate,
             terms = terms,
             system = system,
-            extraAmortizations = emptyMap(),
-            reduceTerm = false // baseline sempre com prazo completo
+            extraAmortizations = emptyMap()
         )
 
         val installmentsWith = calculate(
@@ -75,8 +67,7 @@ class FinancingCalculator(
             rate = rate,
             terms = terms,
             system = system,
-            extraAmortizations = extraAmortizations,
-            reduceTerm = reduceTerm
+            extraAmortizations = extraAmortizations
         )
 
         val summaryWithout = installmentsWithout.toSummary(system)

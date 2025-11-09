@@ -30,8 +30,7 @@ class SacCalculatorRegressionTest {
             loanAmount = 121_000.0,
             monthlyRate = rate,
             terms = 420,
-            extraAmortizations = mapOf(8 to 76_000.0),
-            reduceTerm = true
+            extraAmortizations = mapOf(8 to ExtraAmortizationInput(76_000.0, reduceTerm = true))
         )
 
         assertEquals(48, result.size)
@@ -47,8 +46,7 @@ class SacCalculatorRegressionTest {
             loanAmount = 121_000.0,
             monthlyRate = rate,
             terms = 420,
-            extraAmortizations = mapOf(8 to 76_000.0),
-            reduceTerm = false
+            extraAmortizations = mapOf(8 to ExtraAmortizationInput(76_000.0, reduceTerm = false))
         )
 
         assertEquals(420, result.size)
