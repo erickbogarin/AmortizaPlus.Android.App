@@ -11,8 +11,8 @@ import com.elab.amortizaplus.domain.model.toSummary
  * Orquestra SAC e PRICE, delegando para calculadoras especializadas.
  */
 class FinancingCalculator(
-    private val sacCalculator: SacCalculator = SacCalculator(),
-    private val priceCalculator: PriceCalculator = PriceCalculator()
+    private val sacCalculator: SacCalculator,
+    private val priceCalculator: PriceCalculator
 ) {
 
     /**

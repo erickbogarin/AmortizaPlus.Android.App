@@ -1,4 +1,4 @@
-package com.elab.amortizaplus.presentation.ui.theme
+package com.elab.amortizaplus.presentation.ds.foundation
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

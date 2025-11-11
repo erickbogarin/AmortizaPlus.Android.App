@@ -17,7 +17,7 @@ import com.elab.amortizaplus.domain.model.toSummary
  * Saída: SimulationResult (parcelas e resumos comparativos)
  */
 class CalculateFinancingUseCase(
-    private val financingCalculator: FinancingCalculator = FinancingCalculator()
+    private val financingCalculator: FinancingCalculator
 ) {
 
     operator fun invoke(simulation: Simulation): SimulationResult {

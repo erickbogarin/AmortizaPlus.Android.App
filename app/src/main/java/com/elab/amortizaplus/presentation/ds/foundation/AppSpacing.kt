@@ -1,8 +1,8 @@
-package com.elab.amortizaplus.presentation.ui.theme
+package com.elab.amortizaplus.presentation.ds.foundation
 
 import androidx.compose.ui.unit.dp
 
-object Spacing {
+object AppSpacing {
     val none = 0.dp
     val extraSmall = 4.dp
     val small = 8.dp

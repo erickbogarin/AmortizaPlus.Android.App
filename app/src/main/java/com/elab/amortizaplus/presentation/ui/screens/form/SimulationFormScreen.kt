@@ -24,9 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import com.elab.amortizaplus.presentation.ui.theme.AmortizaPlusTheme
-import com.elab.amortizaplus.presentation.ui.theme.Dimens
-import com.elab.amortizaplus.presentation.ui.theme.Spacing
+import com.elab.amortizaplus.presentation.designsystem.theme.AmortizaPlusTheme
+import com.elab.amortizaplus.presentation.ds.foundation.AppDimens
+import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,8 +51,8 @@ fun SimulationFormScreen() {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(Spacing.large),
-                verticalArrangement = Arrangement.spacedBy(Spacing.large),
+                    .padding(AppSpacing.large),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.large),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 OutlinedTextField(
@@ -86,7 +86,7 @@ fun SimulationFormScreen() {
                     onClick = { /* simular futuramente */ },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(Dimens.buttonHeightMedium)
+                        .height(AppDimens.buttonHeightMedium)
                 ) {
                     Text("Simular", style = MaterialTheme.typography.titleSmall)
                 }

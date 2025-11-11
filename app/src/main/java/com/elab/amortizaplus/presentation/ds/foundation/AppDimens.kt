@@ -1,9 +1,9 @@
-package com.elab.amortizaplus.presentation.ui.theme
+package com.elab.amortizaplus.presentation.ds.foundation
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-object Dimens {
+object AppDimens {
     // Corner radius
     val cornerRadiusSmall = 8.dp
     val cornerRadiusMedium = 12.dp

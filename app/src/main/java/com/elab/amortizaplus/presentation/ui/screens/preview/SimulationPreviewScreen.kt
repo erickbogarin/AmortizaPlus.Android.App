@@ -13,6 +13,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.elab.amortizaplus.domain.calculator.ExtraAmortizationInput
 import com.elab.amortizaplus.domain.calculator.FinancingCalculator
+import com.elab.amortizaplus.domain.calculator.PriceCalculator
+import com.elab.amortizaplus.domain.calculator.SacCalculator
 import com.elab.amortizaplus.domain.model.AmortizationSystem
 import com.elab.amortizaplus.domain.model.InterestRate
 import java.text.NumberFormat
@@ -34,7 +36,10 @@ fun SimulationPreviewScreen() {
     )
 
     val formatCurrency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
-    val calculator = FinancingCalculator()
+    val calculator = FinancingCalculator(
+        SacCalculator(),
+        PriceCalculator(),
+    )
 
     // --- Simulações ---
     val (summaryWithout, summaryWith) = calculator.compare(
