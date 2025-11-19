@@ -21,8 +21,11 @@ class SimulationInputValidator {
             return ValidationResult(false, "Campo obrigatório")
         }
 
-        val amount = value.replace(",", ".").toDoubleOrNull()
+        // valor em centavos!
+        val centavos = value.toLongOrNull()
             ?: return ValidationResult(false, "Valor inválido")
+
+        val amount = centavos / 100.0  // agora sim → reais
 
         return when {
             amount <= 0 -> ValidationResult(false, "Valor deve ser maior que zero")
@@ -30,6 +33,7 @@ class SimulationInputValidator {
             else -> ValidationResult(true)
         }
     }
+
 
     fun validateInterestRate(value: String): ValidationResult {
         if (value.isBlank()) {

@@ -6,6 +6,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.elab.amortizaplus.presentation.ds.components.textfield.formatters.*
+import com.elab.amortizaplus.presentation.ds.components.textfield.transformation.MoneyVisualTransformation
 
 data class TextFieldConfig(
     /**
@@ -42,13 +43,18 @@ fun TextFieldVariant.toConfig(): TextFieldConfig = when (this) {
         ),
         formatter = NumberFormatter()
     )
-    TextFieldVariant.Money -> TextFieldConfig(
-        keyboard = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Next
-        ),
-        formatter = MoneyFormatter()
-    )
+    TextFieldVariant.Money -> run {
+        val formatter = MoneyFormatter()
+        TextFieldConfig(
+            keyboard = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
+            formatter = formatter,
+            visualTransformation = MoneyVisualTransformation(formatter)
+        )
+    }
+
     TextFieldVariant.Percentage -> TextFieldConfig(
         keyboard = KeyboardOptions(
             keyboardType = KeyboardType.Decimal,

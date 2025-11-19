@@ -117,7 +117,7 @@ fun AppOutlinedTextField(
 
     Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
-            value = displayValue,
+            value = value,
             onValueChange = { newInput ->
                 // 1. Sanitiza: remove caracteres inválidos
                 val sanitized = config.formatter.sanitize(newInput)
