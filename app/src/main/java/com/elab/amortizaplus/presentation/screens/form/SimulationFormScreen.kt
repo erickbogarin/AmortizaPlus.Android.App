@@ -1,4 +1,4 @@
-package com.elab.amortizaplus.presentation.ui.screens.form
+package com.elab.amortizaplus.presentation.screens.form
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

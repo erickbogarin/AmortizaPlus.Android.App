@@ -207,40 +207,28 @@ val LocalAppColors = staticCompositionLocalOf { LightExtendedColors }
 @Composable
 fun AmortizaPlusTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Desabilitado para manter identidade da marca
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    // Seleciona esquema de cores
     val colorScheme = when {
-        // Cores dinâmicas desabilitadas por padrão para manter identidade visual
-        // Pode ser habilitado no futuro via preferências do usuário
-        // dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-        //     val context = LocalContext.current
-        //     if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        // }
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 
-    // Seleciona cores estendidas
     val extendedColors = if (darkTheme) DarkExtendedColors else LightExtendedColors
 
-    // Configura status bar (apenas em Activities)
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as? Activity)?.window
             window?.let {
-                // Define cor da status bar
                 it.statusBarColor = colorScheme.primary.toArgb()
 
-                // Define ícones da status bar (claro/escuro)
                 WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = !darkTheme
             }
         }
     }
 
-    // Aplica tema
     CompositionLocalProvider(
         LocalAppColors provides extendedColors
     ) {

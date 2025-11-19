@@ -1,147 +1,272 @@
 package com.elab.amortizaplus.presentation.ds.components
 
+
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.VisualTransformation
+
+import com.elab.amortizaplus.presentation.ds.components.textfield.TextFieldVariant
+import com.elab.amortizaplus.presentation.ds.components.textfield.toConfig
 import com.elab.amortizaplus.presentation.ds.foundation.AppColors
-import com.elab.amortizaplus.presentation.ds.foundation.AppAnimationDefaults
 import com.elab.amortizaplus.presentation.ds.foundation.AppDimens
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 
 /**
+ * TextField padronizado do AmortizaPlus com suporte a formatação.
  *
- * Campo de texto padronizado do Design System com feedback visual melhorado.
- * Melhorias de UX:
- * - Ícone de erro/sucesso animado
- * - Transição suave de mensagens
- * - Estados visuais claros
- * - Microinterações padronizadas
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * ✅ CONTRATO FUNDAMENTAL (leia antes de modificar):
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  *
- * IMPORTANTE: 100% baseado em tokens (zero hardcodes).
+ * 1. `value` prop SEMPRE representa valor RAW (sem formatação)
+ *    - Exemplo Money: "12345" (centavos, não "R$ 123,45")
+ *    - Exemplo Percentage: "1250" (basis points, não "12,50%")
+ *    - Exemplo CPF: "12345678900" (dígitos, não "123.456.789-00")
  *
- * @param value Texto atual do campo
- * @param onValueChange Callback ao alterar o texto
+ * 2. `displayValue` é calculado via `formatForDisplay(value)`
+ *    - ÚNICA fonte de formatação visual
+ *    - Transformations NÃO devem duplicar esta lógica
+ *
+ * 3. VisualTransformation gerencia APENAS cursor
+ *    - SimpleCursorTransformation: cursor no final (Money, %, Number)
+ *    - MaskTransformation: cursor inteligente (CPF, Phone, CEP)
+ *
+ * 4. `onValueChange` SEMPRE emite valor RAW
+ *    - Sanitizado (caracteres inválidos removidos)
+ *    - Parseado (convertido para formato interno)
+ *    - SEM formatação visual
+ *
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ *
+ * Arquitetura (ATUALIZADA):
+ * 1. ViewModel emite valores "crus" (raw) - sem formatação
+ * 2. formatForDisplay() formata para exibição visual
+ * 3. VisualTransformation APENAS gerencia cursor
+ * 4. onValueChange emite valores crus de volta para ViewModel
+ *
+ * Fluxo de dados (ATUALIZADO):
+ * ┌──────────────────────────────────────────────────┐
+ * │ ViewModel                                         │
+ * │   state: "12345" (centavos)                      │
+ * └────────────┬─────────────────────────────────────┘
+ *              │ (value prop)
+ *              ▼
+ * ┌──────────────────────────────────────────────────┐
+ * │ TextField                                         │
+ * │   formatForDisplay("12345") → "R$ 123,45"        │
+ * │   visualTransformation → gerencia cursor         │
+ * └────────────┬─────────────────────────────────────┘
+ *              │ (onValueChange)
+ *              ▼
+ * ┌──────────────────────────────────────────────────┐
+ * │ User types: "1234567"                            │
+ * │   formatter.sanitize → "1234567"                 │
+ * │   formatter.parse → "1234567"                    │
+ * │   emits: "1234567" (raw)                         │
+ * └────────────┬─────────────────────────────────────┘
+ *              │
+ *              ▼
+ * ┌──────────────────────────────────────────────────┐
+ * │ ViewModel                                         │
+ * │   state = "1234567" (centavos = R$ 12.345,67)   │
+ * └──────────────────────────────────────────────────┘
+ *
+ * @param value Valor cru (raw) do ViewModel - SEM formatação
+ * @param onValueChange Callback que emite valor cru de volta
  * @param label Rótulo do campo
+ * @param variant Tipo de formatação (Default, Money, Percentage, etc)
+ * @param placeholder Texto de exemplo
+ * @param supportingText Texto de ajuda ou erro abaixo do campo
+ * @param isError Se o campo está em estado de erro
+ * @param showSuccessIcon Se deve mostrar ícone de sucesso quando preenchido
+ * @param enabled Se o campo está habilitado
+ * @param keyboardActions Ações do teclado (Done, Next, etc)
  * @param modifier Modificador Compose
- * @param placeholder Texto de dica (opcional)
- * @param leadingIcon Ícone à esquerda (opcional)
- * @param supportingText Texto de ajuda/erro abaixo do campo (opcional)
- * @param isError Indica estado de erro
- * @param showSuccessIcon Exibe ícone de sucesso quando válido
- * @param enabled Habilita/desabilita o campo
- * @param readOnly Campo apenas leitura
- * @param singleLine Força linha única
- * @param maxLines Máximo de linhas
- * @param keyboardOptions Opções de teclado
- * @param keyboardActions Ações do teclado
- * @param visualTransformation Transformação visual (ex: máscara)
  */
 @Composable
 fun AppOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    modifier: Modifier = Modifier,
+    variant: TextFieldVariant = TextFieldVariant.Default,
     placeholder: String? = null,
-    leadingIcon: @Composable (() -> Unit)? = null,
     supportingText: String? = null,
     isError: Boolean = false,
     showSuccessIcon: Boolean = false,
     enabled: Boolean = true,
-    readOnly: Boolean = false,
-    singleLine: Boolean = true,
-    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    visualTransformation: VisualTransformation = VisualTransformation.None
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
+    // Configuração do formatter (memoizada para evitar recomposições)
+    val config = remember(variant) { variant.toConfig() }
+
+    // Formata o valor cru para exibição
+    // Ex: ViewModel emite "12345" (centavos) → formatForDisplay → "R$ 123,45"
+    // VisualTransformation APENAS gerencia cursor (não formata mais)
+    val displayValue = remember(value, variant) {
+        config.formatter.formatForDisplay(value)
+    }
+
+    Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
+            value = displayValue,
+            onValueChange = { newInput ->
+                // 1. Sanitiza: remove caracteres inválidos
+                val sanitized = config.formatter.sanitize(newInput)
+
+                // 2. Parse: converte para valor cru
+                val rawValue = config.formatter.parse(sanitized)
+
+                // 3. Emite valor cru para ViewModel
+                onValueChange(rawValue)
+            },
             label = { Text(label) },
             placeholder = placeholder?.let { { Text(it) } },
-            leadingIcon = leadingIcon,
-            trailingIcon = {
-                // Ícone de feedback visual com animação padronizada
-                AnimatedVisibility(
-                    visible = isError || (showSuccessIcon && value.isNotBlank()),
-                    enter = AppAnimationDefaults.defaultEnter(),
-                    exit = AppAnimationDefaults.defaultExit()
-                ) {
-                    Icon(
-                        imageVector = if (isError) Icons.Default.Close else
-                            Icons.Default.CheckCircle,
-                        contentDescription = if (isError) "Campo inválido" else
-                            "Campo válido",
-                        tint = if (isError) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            AppColors.Success // ← Token semântico
-                        },
-                        modifier = Modifier.size(AppDimens.iconSizeMedium)
-                    )
-                }
-            },
+            visualTransformation = config.visualTransformation,
+            singleLine = true,
+            keyboardOptions = config.keyboard,
+            keyboardActions = keyboardActions,
             isError = isError,
             enabled = enabled,
-            readOnly = readOnly,
-            singleLine = singleLine,
-            maxLines = maxLines,
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            visualTransformation = visualTransformation,
-            modifier = Modifier.fillMaxWidth(),
+            trailingIcon = {
+                TrailingIcon(
+                    isError = isError,
+                    showSuccess = showSuccessIcon && value.isNotBlank(),
+                )
+            },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                errorBorderColor = MaterialTheme.colorScheme.error,
-                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                // Customizações de cor podem ser adicionadas aqui
             ),
-            textStyle = MaterialTheme.typography.bodyLarge
+            modifier = Modifier.fillMaxWidth()
         )
-        // Mensagem de suporte animada (zero hardcodes)
-        AnimatedVisibility(
-            visible = supportingText != null,
-            enter = AppAnimationDefaults.defaultEnter(),
-            exit = AppAnimationDefaults.defaultExit()
-        ) {
-            supportingText?.let {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Spacer(Modifier.width(AppSpacing.small)) // ← Token
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (isError) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
-                }
+
+        // Texto de suporte (erro ou informação)
+        AnimatedVisibility(visible = supportingText != null) {
+            SupportingText(
+                text = supportingText.orEmpty(),
+                isError = isError
+            )
+        }
+    }
+}
+
+/**
+ * Ícone de trailing (erro ou sucesso).
+ */
+@Composable
+private fun TrailingIcon(
+    isError: Boolean,
+    showSuccess: Boolean
+) {
+    AnimatedVisibility(visible = isError || showSuccess) {
+        Icon(
+            imageVector = if (isError) {
+                Icons.Default.Close
+            } else {
+                Icons.Default.CheckCircle
+            },
+            contentDescription = if (isError) {
+                "Campo inválido"
+            } else {
+                "Campo válido"
+            },
+            tint = if (isError) {
+                MaterialTheme.colorScheme.error
+            } else {
+                AppColors.Success
+            },
+            modifier = Modifier.size(AppDimens.iconSizeMedium)
+        )
+    }
+}
+
+/**
+ * Texto de suporte (abaixo do campo).
+ */
+@Composable
+private fun SupportingText(
+    text: String,
+    isError: Boolean
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(start = AppSpacing.small, top = AppSpacing.extraSmall)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = if (isError) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
             }
+        )
+    }
+}
+
+// ========================================
+// PREVIEW (para desenvolvimento)
+// ========================================
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun AppOutlinedTextFieldPreview() {
+    MaterialTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppSpacing.medium),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+        ) {
+            // Campo de texto padrão
+            var textValue by remember { mutableStateOf("") }
+            AppOutlinedTextField(
+                value = textValue,
+                onValueChange = { textValue = it },
+                label = "Nome completo",
+                variant = TextFieldVariant.Default,
+                placeholder = "Digite seu nome"
+            )
+
+            // Campo numérico
+            var numberValue by remember { mutableStateOf("") }
+            AppOutlinedTextField(
+                value = numberValue,
+                onValueChange = { numberValue = it },
+                label = "Prazo (meses)",
+                variant = TextFieldVariant.Number,
+                placeholder = "360"
+            )
+
+            // Campo monetário
+            var moneyValue by remember { mutableStateOf("") }
+            AppOutlinedTextField(
+                value = moneyValue,
+                onValueChange = { moneyValue = it },
+                label = "Valor financiado",
+                variant = TextFieldVariant.Money,
+                placeholder = "0,00",
+                supportingText = "Digite o valor que deseja financiar"
+            )
+
+            // Campo de porcentagem
+            var percentValue by remember { mutableStateOf("") }
+            AppOutlinedTextField(
+                value = percentValue,
+                onValueChange = { percentValue = it },
+                label = "Taxa de juros",
+                variant = TextFieldVariant.Percentage,
+                placeholder = "0,00",
+                showSuccessIcon = true
+            )
         }
     }
 }

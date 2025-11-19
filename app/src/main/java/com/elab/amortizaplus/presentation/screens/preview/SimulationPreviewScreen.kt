@@ -1,4 +1,4 @@
-package com.elab.amortizaplus.presentation.ui.screens.preview
+package com.elab.amortizaplus.presentation.screens.preview
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
