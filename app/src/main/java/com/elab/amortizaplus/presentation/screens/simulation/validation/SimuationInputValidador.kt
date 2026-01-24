@@ -35,13 +35,16 @@ class SimulationInputValidator {
     }
 
 
-    fun validateInterestRate(value: String): ValidationResult {
-        if (value.isBlank()) {
+    fun validateInterestRate(rawValue: String): ValidationResult {
+        if (rawValue.isBlank()) {
             return ValidationResult(false, "Campo obrigatório")
         }
 
-        val rate = value.replace(",", ".").toDoubleOrNull()
+        // rawValue ex.: "1300" → 13.00%
+        val basisPoints = rawValue.toLongOrNull()
             ?: return ValidationResult(false, "Taxa inválida")
+
+        val rate = basisPoints / 100.0  // agora sim → 13.00
 
         return when {
             rate <= 0 -> ValidationResult(false, "Taxa deve ser maior que zero")

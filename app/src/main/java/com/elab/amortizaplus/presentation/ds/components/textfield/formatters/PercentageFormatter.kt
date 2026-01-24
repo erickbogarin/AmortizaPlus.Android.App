@@ -1,113 +1,183 @@
 package com.elab.amortizaplus.presentation.ds.components.textfield.formatters
 
-import com.elab.amortizaplus.presentation.ds.components.textfield.formatters.InputSanitizers.digitsAndDecimal
-import com.elab.amortizaplus.presentation.ds.components.textfield.formatters.LocaleUtils.decimalSeparator
-import java.text.DecimalFormatSymbols
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import java.util.Locale
 
 /**
- * Formatter para porcentagens com decimais.
+ * ✅ SOLUÇÃO: Percentage Formatter com arquitetura consistente
  *
- * Armazenamento: Basis points (ex: 12.5% = 1250)
+ * Raw value = basis points sem formatação (ex: "1234" = 12.34%)
+ * Input = apenas dígitos (sem vírgula, sem %)
+ * Display = formatado com vírgula e % (ex: "12,34%")
  *
- * Fluxo:
- * 1. User digita: "12,5"
- * 2. Sanitize: "12,5" (aceita decimal)
- * 3. Parse: "1250" (basis points)
- * 4. Display: "12,50%"
- *
- * ✅ Formatação unificada em formatForDisplay()
+ * Similar ao MoneyFormatter:
+ * - TextField usa raw value
+ * - VisualTransformation adiciona formatação visual
+ * - Sem problemas de concatenação
  */
 class PercentageFormatter(
     private val locale: Locale = Locale("pt", "BR"),
     private val maxDecimalPlaces: Int = 2,
-    private val maxIntegerDigits: Int = 3  // 0-100 (ou até 999 se necessário)
+    private val maxIntegerDigits: Int = 3
 ) : InputFormatter {
 
-    private val separator = locale.decimalSeparator()
+    private val separator = if (locale.language == "pt") ',' else '.'
+    private val maxDigits = maxIntegerDigits + maxDecimalPlaces // ex: 3 + 2 = 5 dígitos (999,99%)
 
+    // ------------------------------------------------------------
+    // 1) SANITIZE - Remove tudo exceto dígitos
+    // ------------------------------------------------------------
     override fun sanitize(input: String): String {
-        // Aceita dígitos + um único separador decimal
-        val withDecimal = digitsAndDecimal(
-            input = input,
-            decimalSeparator = separator,
-            allowMultiple = false
-        )
+        // Remove TUDO exceto dígitos (%, vírgula, pontos, letras)
+        val digitsOnly = input.filter { it.isDigit() }
 
-        // ✅ REFINAMENTO: Remove zeros à esquerda desnecessários
-        val cleaned = removeLeadingZeros(withDecimal)
+        // Remove zeros à esquerda
+        val trimmed = digitsOnly.trimStart('0')
 
-        // Valida limites (ex: max 3 dígitos antes, 2 depois)
-        return limitDecimalPlaces(cleaned)
+        // Limita ao máximo de dígitos permitido
+        val limited = trimmed.take(maxDigits)
+
+        return limited.ifBlank { "0" }
     }
 
-    /**
-     * Remove zeros à esquerda desnecessários.
-     * "000" → "0"
-     * "00123" → "123"
-     * "0,5" → "0,5" (mantém se houver decimal)
-     */
-    private fun removeLeadingZeros(input: String): String {
-        if (input.isBlank() || input == "0") return input
-        if (input.startsWith("0${separator}")) return input  // "0,5" é válido
-
-        // Remove zeros à esquerda: "00123" → "123"
-        val trimmed = input.trimStart('0')
-
-        // Se ficou vazio ou só separador, retorna "0"
-        return trimmed.ifBlank { "0" }
-    }
-
+    // ------------------------------------------------------------
+    // 2) PARSE - Já vem sanitizado, retorna como está
+    // ------------------------------------------------------------
     override fun parse(input: String): String {
-        // Remove separador e converte para basis points
-        // Ex: "12,5" → "1250" (12.5 * 100)
-
-        if (input.isBlank()) return "0"
-
-        val parts = input.split(separator)
-        val integerPart = parts.getOrNull(0)?.ifBlank { "0" } ?: "0"
-        val decimalPart = parts.getOrNull(1)?.padEnd(maxDecimalPlaces, '0') ?: "0".repeat(maxDecimalPlaces)
-
-        // ✅ ROBUSTEZ: Garante padding correto para valores pequenos
-        // "1" → "100" (1.00%)
-        // "12" → "1200" (12.00%)
-        // "0,5" → "50" (0.50%)
-        val combined = integerPart + decimalPart.take(maxDecimalPlaces)
-
-        return combined.toLongOrNull()?.toString() ?: "0"
+        // Input já vem sanitizado (apenas dígitos)
+        // "123" → "123" (representa 1,23%)
+        return if (input.isBlank()) "0" else input
     }
 
+    // ------------------------------------------------------------
+    // 3) DISPLAY - Formata basis points para percentual com %
+    // ------------------------------------------------------------
     override fun formatForDisplay(rawValue: String): String {
-        if (rawValue.isBlank()) return ""
+        if (rawValue.isBlank() || rawValue == "0") {
+            return "0${separator}00%"
+        }
 
-        // ✅ CONSISTÊNCIA: Exibe zero explicitamente (como Money)
-        val value = rawValue.toLongOrNull() ?: return ""
-        if (value == 0L) return "0,00%"
+        val basisPoints = rawValue.toLongOrNull() ?: return "0${separator}00%"
 
-        // Reconstrói decimal a partir de basis points
-        // "1250" → "12,50%"
-
-        // Divide por 10^maxDecimalPlaces
+        // Converte basis points para percentual
+        // Ex: 1234 basis points = 12.34%
         val divisor = Math.pow(10.0, maxDecimalPlaces.toDouble())
-        val decimal = value / divisor
+        val percent = basisPoints / divisor
 
-        // Formata com casas decimais
-        val formatted = String.format(locale, "%.${maxDecimalPlaces}f", decimal)
-            .replace('.', separator)
+        // Formata com 2 casas decimais
+        val formatted = String.format(locale, "%.${maxDecimalPlaces}f%%", percent)
 
-        return "$formatted%"
+        // Substitui ponto por vírgula se necessário
+        return formatted.replace('.', separator)
+    }
+
+    // ------------------------------------------------------------
+    // 4) TRANSFORMATION - Formata visualmente enquanto digita
+    // ------------------------------------------------------------
+    override fun createTransformation(): VisualTransformation {
+        return PercentageVisualTransformation(separator, maxDecimalPlaces)
+    }
+}
+
+/**
+ * VisualTransformation para campo de porcentagem.
+ * Transforma "1234" → "12,34%" enquanto o usuário digita.
+ */
+class PercentageVisualTransformation(
+    private val separator: Char = ',',
+    private val decimalPlaces: Int = 2
+) : VisualTransformation {
+
+    override fun filter(text: AnnotatedString): TransformedText {
+        val original = text.text
+
+        // Formata os dígitos raw para percentual visual
+        val formatted = formatToPercentage(original)
+
+        return TransformedText(
+            text = AnnotatedString(formatted),
+            offsetMapping = PercentageOffsetMapping(
+                originalLength = original.length,
+                formattedLength = formatted.length,
+                separator = separator,
+                decimalPlaces = decimalPlaces
+            )
+        )
     }
 
     /**
-     * Limita dígitos antes e depois do separador.
+     * Converte dígitos raw em formato percentual.
+     * Ex: "1234" → "12,34%"
      */
-    private fun limitDecimalPlaces(input: String): String {
-        if (!input.contains(separator)) {
-            return input.take(maxIntegerDigits)
+    private fun formatToPercentage(digits: String): String {
+        if (digits.isBlank() || digits == "0") {
+            return "0${separator}00%"
         }
-        val parts = input.split(separator)
-        val integerPart = parts[0].take(maxIntegerDigits)
-        val decimalPart = parts[1].take(maxDecimalPlaces)
-        return "$integerPart$separator$decimalPart"
+
+        // Pad com zeros à esquerda para ter pelo menos decimalPlaces+1 dígitos
+        val padded = digits.padStart(decimalPlaces + 1, '0')
+
+        // Separa parte inteira e decimal
+        val decimalStart = padded.length - decimalPlaces
+        val integerPart = padded.substring(0, decimalStart)
+        val decimalPart = padded.substring(decimalStart)
+
+        return "$integerPart$separator$decimalPart%"
+    }
+}
+
+/**
+ * Mapeia posições do cursor entre texto original e formatado.
+ */
+class PercentageOffsetMapping(
+    private val originalLength: Int,
+    private val formattedLength: Int,
+    private val separator: Char,
+    private val decimalPlaces: Int
+) : OffsetMapping {
+
+    /**
+     * Original → Transformado
+     * Ex: "123|4" → "1,23|4%" (cursor após 3)
+     */
+    override fun originalToTransformed(offset: Int): Int {
+        if (originalLength == 0) return 0
+
+        val padded = "0".repeat(maxOf(0, decimalPlaces + 1 - originalLength))
+        val totalDigits = padded.length + originalLength
+        val decimalStart = totalDigits - decimalPlaces
+
+        val adjustedOffset = offset + padded.length
+
+        return when {
+            adjustedOffset <= decimalStart -> adjustedOffset
+            adjustedOffset <= totalDigits -> adjustedOffset + 1 // +1 pelo separator
+            else -> formattedLength
+        }
+    }
+
+    /**
+     * Transformado → Original
+     * Ex: "1,23|4%" → "123|4" (cursor volta para raw)
+     */
+    override fun transformedToOriginal(offset: Int): Int {
+        if (formattedLength == 0) return 0
+
+        val padded = "0".repeat(maxOf(0, decimalPlaces + 1 - originalLength))
+        val totalDigits = padded.length + originalLength
+        val decimalStart = totalDigits - decimalPlaces
+
+        // Remove caracteres de formatação antes do offset
+        val digitsBeforeOffset = when {
+            offset <= decimalStart -> offset
+            offset <= decimalStart + 1 -> decimalStart // no separator
+            offset <= totalDigits + 1 -> offset - 1 // após separator
+            else -> totalDigits
+        }
+
+        return maxOf(0, digitsBeforeOffset - padded.length)
     }
 }

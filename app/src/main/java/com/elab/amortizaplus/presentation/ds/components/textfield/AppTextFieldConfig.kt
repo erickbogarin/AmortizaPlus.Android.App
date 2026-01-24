@@ -55,11 +55,15 @@ fun TextFieldVariant.toConfig(): TextFieldConfig = when (this) {
         )
     }
 
-    TextFieldVariant.Percentage -> TextFieldConfig(
-        keyboard = KeyboardOptions(
-            keyboardType = KeyboardType.Decimal,
-            imeAction = ImeAction.Next
-        ),
-        formatter = PercentageFormatter()
-    )
+    TextFieldVariant.Percentage -> run {
+        val formatter = PercentageFormatter()
+        TextFieldConfig(
+            keyboard = KeyboardOptions(
+                keyboardType = KeyboardType.Number,  // ✅ Number, não Decimal
+                imeAction = ImeAction.Next
+            ),
+            formatter = formatter,
+            visualTransformation = formatter.createTransformation()  // ✅ Usa a transformation
+        )
+    }
 }

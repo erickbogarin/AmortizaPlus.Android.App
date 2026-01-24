@@ -11,33 +11,46 @@ import androidx.compose.ui.text.input.VisualTransformation
  * ✅ IMPORTANTE: NÃO formata texto (isso é feito em formatForDisplay).
  * Apenas impede que cursor vá para depois do "%".
  */
-private class PercentageCursorTransformation : VisualTransformation {
+class PercentageCursorTransformation : VisualTransformation {
 
     override fun filter(text: AnnotatedString): TransformedText {
-        // Não altera o texto - ele já vem formatado de formatForDisplay()
-        return TransformedText(
-            text = text,
-            offsetMapping = PercentageOffsetMapping(text.text.length)
-        )
-    }
-}
 
-/**
- * Mapeamento de cursor para porcentagem.
- * Impede cursor depois do "%" (posição não editável).
- */
-private class PercentageOffsetMapping(
-    private val textLength: Int
-) : OffsetMapping {
+        val transformedText = text
 
-    override fun originalToTransformed(offset: Int): Int {
-        // Se texto termina com "%", cursor fica antes dele
-        val maxCursorPos = if (textLength > 0) textLength - 1 else 0
-        return offset.coerceIn(0, maxCursorPos)
-    }
+        val offsetMapping = object : OffsetMapping {
 
-    override fun transformedToOriginal(offset: Int): Int {
-        val maxCursorPos = if (textLength > 0) textLength - 1 else 0
-        return offset.coerceIn(0, maxCursorPos)
+            override fun originalToTransformed(offset: Int): Int {
+                if (transformedText.isEmpty()) return 0
+
+                val last = transformedText.length - 1
+
+                // Se termina com %, cursor só pode ir até antes dele
+                val maxCursor = if (transformedText.text.last() == '%')
+                    last - 1
+                else
+                    last
+
+                // Proteção total
+                val safeMax = maxCursor.coerceAtLeast(0)
+
+                return offset.coerceIn(0, safeMax)
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                if (transformedText.isEmpty()) return 0
+
+                val last = transformedText.length - 1
+                val maxCursor = if (transformedText.text.last() == '%')
+                    last - 1
+                else
+                    last
+
+                val safeMax = maxCursor.coerceAtLeast(0)
+
+                return offset.coerceIn(0, safeMax)
+            }
+        }
+
+        return TransformedText(transformedText, offsetMapping)
     }
 }

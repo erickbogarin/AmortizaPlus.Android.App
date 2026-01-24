@@ -105,19 +105,13 @@ fun AppOutlinedTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     modifier: Modifier = Modifier
 ) {
-    // Configuração do formatter (memoizada para evitar recomposições)
     val config = remember(variant) { variant.toConfig() }
 
-    // Formata o valor cru para exibição
-    // Ex: ViewModel emite "12345" (centavos) → formatForDisplay → "R$ 123,45"
-    // VisualTransformation APENAS gerencia cursor (não formata mais)
-    val displayValue = remember(value, variant) {
-        config.formatter.formatForDisplay(value)
-    }
+    val actualValue = value  // SEMPRE raw value
 
     Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
-            value = value,
+            value = actualValue,
             onValueChange = { newInput ->
                 // 1. Sanitiza: remove caracteres inválidos
                 val sanitized = config.formatter.sanitize(newInput)
