@@ -11,7 +11,7 @@ import com.elab.amortizaplus.domain.util.MathUtils.roundTwo
  * Converte uma lista de parcelas em resumo financeiro.
  */
 fun List<Installment>.toSummary(system: AmortizationSystem? = null): SimulationSummary {
-    val totalPaid = sumOf { it.installment }
+    val totalPaid = sumOf { it.installment + it.extraAmortization }
     val totalInterest = sumOf { it.interest }
     val totalAmortized = sumOf { it.amortization + it.extraAmortization }
 

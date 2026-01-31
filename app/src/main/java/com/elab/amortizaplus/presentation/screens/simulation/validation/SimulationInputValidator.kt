@@ -1,7 +1,8 @@
 package com.elab.amortizaplus.presentation.screens.simulation.validation
 
 import com.elab.amortizaplus.presentation.util.ValidationResult
-import kotlin.math.roundToInt
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
 
 /**
  * Responsável por validar os campos do formulário de simulação.
@@ -65,6 +66,19 @@ class SimulationInputValidator {
             terms <= 0 -> ValidationResult(false, "Prazo deve ser maior que zero")
             terms > 600 -> ValidationResult(false, "Prazo máximo: 600 meses (50 anos)")
             else -> ValidationResult(true)
+        }
+    }
+
+    fun validateStartDate(value: String): ValidationResult {
+        if (value.isBlank()) {
+            return ValidationResult(false, "Campo obrigatório")
+        }
+
+        return try {
+            LocalDate.parse(value)
+            ValidationResult(true)
+        } catch (e: DateTimeParseException) {
+            ValidationResult(false, "Data inválida (use AAAA-MM-DD)")
         }
     }
 }

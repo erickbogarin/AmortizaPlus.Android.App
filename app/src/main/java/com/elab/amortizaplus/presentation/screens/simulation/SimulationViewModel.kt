@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.elab.amortizaplus.domain.model.InterestRateType
 import com.elab.amortizaplus.domain.model.Simulation
 import com.elab.amortizaplus.domain.usecase.CalculateFinancingUseCase
-import com.elab.amortizaplus.domain.util.DateProvider
 import com.elab.amortizaplus.presentation.screens.simulation.validation.SimulationInputValidator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -53,12 +52,47 @@ class SimulationViewModel(
         )
     }
 
+    fun onStartDateChange(value: String) {
+        val validation = validator.validateStartDate(value)
+        _formState.value = _formState.value.copy(
+            startDate = value,
+            startDateError = validation.message
+        )
+    }
+
     fun onRateTypeChange(rateType: InterestRateType) {
         _formState.value = _formState.value.copy(rateType = rateType)
     }
 
     fun onSystemChange(system: com.elab.amortizaplus.domain.model.AmortizationSystem) {
         _formState.value = _formState.value.copy(system = system)
+    }
+
+    fun addExtraAmortization() {
+        val newItem = ExtraAmortizationFormItem(
+            id = System.currentTimeMillis()
+        )
+        _formState.value = _formState.value.copy(
+            extraAmortizations = _formState.value.extraAmortizations + newItem
+        )
+    }
+
+    fun removeExtraAmortization(id: Long) {
+        _formState.value = _formState.value.copy(
+            extraAmortizations = _formState.value.extraAmortizations.filterNot { it.id == id }
+        )
+    }
+
+    fun onExtraMonthChange(id: Long, value: String) {
+        updateExtraItem(id) { it.copy(month = value) }
+    }
+
+    fun onExtraAmountChange(id: Long, value: String) {
+        updateExtraItem(id) { it.copy(amount = value) }
+    }
+
+    fun onExtraStrategyChange(id: Long, strategy: com.elab.amortizaplus.domain.model.ExtraAmortizationStrategy) {
+        updateExtraItem(id) { it.copy(strategy = strategy) }
     }
 
     // -------------------------------------------------------------------------
@@ -85,9 +119,9 @@ class SimulationViewModel(
                     interestRate = inputData.interestRate,
                     rateType = inputData.rateType,
                     terms = inputData.terms,
-                    startDate = DateProvider.today(),
+                    startDate = inputData.startDate,
                     amortizationSystem = inputData.system,
-                    extraAmortizations = emptyList(),
+                    extraAmortizations = inputData.extraAmortizations,
                     name = "Simulação ${System.currentTimeMillis()}"
                 )
 
@@ -108,5 +142,16 @@ class SimulationViewModel(
     fun reset() {
         _formState.value = SimulationFormState()
         _uiState.value = SimulationUiState.Initial
+    }
+
+    private fun updateExtraItem(
+        id: Long,
+        transform: (ExtraAmortizationFormItem) -> ExtraAmortizationFormItem
+    ) {
+        _formState.value = _formState.value.copy(
+            extraAmortizations = _formState.value.extraAmortizations.map { item ->
+                if (item.id == id) transform(item) else item
+            }
+        )
     }
 }
