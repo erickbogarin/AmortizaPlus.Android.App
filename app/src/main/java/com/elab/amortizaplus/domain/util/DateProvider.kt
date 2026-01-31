@@ -8,4 +8,9 @@ object DateProvider {
         val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return formatter.format(Date())
     }
+
+    fun monthYear(): String {
+        val formatter = SimpleDateFormat("MMyyyy", Locale.getDefault())
+        return formatter.format(Date())
+    }
 }

@@ -22,8 +22,8 @@ object SimulationTexts {
     val interestRatePlaceholder = "Ex: 13"
     val termsLabel = "Prazo (meses)"
     val termsPlaceholder = "Ex: 420"
-    val startDateLabel = "Data de início"
-    val startDatePlaceholder = "Ex: 2026-01-31"
+    val startDateLabel = "Data de início (mês/ano)"
+    val startDatePlaceholder = "Ex: 02/2026"
     // Opções
     val rateTypeAnnual = "Anual"
     val rateTypeMonthly = "Mensal"
@@ -44,6 +44,7 @@ object SimulationTexts {
     val calculateButton = "Calcular Simulação"
     val newSimulationButton = "Nova Simulação"
     val viewTableButton = "Ver Tabela Detalhada"
+    val retryButton = "Tentar novamente"
     val tableTitle = "Tabela Detalhada"
     val tableSubtitle = "Detalhamento de parcelas e totais do cenário selecionado."
     val tableShowingWithExtra = "Mostrando parcelas com amortização extra"
@@ -63,6 +64,11 @@ object SimulationTexts {
     val tableSummaryTotalInterest = "Total de Juros"
     val tableSummaryTotalAmortized = "Total Amortizado"
     val tableSummaryTerm = "Prazo"
+    // Estados
+    val initialTitle = "Pronto para simular?"
+    val initialDescription = "Preencha os dados acima e toque em Calcular Simulação."
+    val errorTitle = "Não foi possível calcular"
+    val errorDescriptionPrefix = "Detalhes:"
     // Estados
     val loadingMessage = "Calculando simulação..."
     // Resultados

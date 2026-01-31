@@ -66,4 +66,15 @@ fun TextFieldVariant.toConfig(): TextFieldConfig = when (this) {
             visualTransformation = formatter.createTransformation()  // ✅ Usa a transformation
         )
     }
+    TextFieldVariant.MonthYear -> run {
+        val formatter = MonthYearFormatter()
+        TextFieldConfig(
+            keyboard = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
+            formatter = formatter,
+            visualTransformation = formatter.createTransformation()
+        )
+    }
 }

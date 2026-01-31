@@ -9,6 +9,7 @@ import com.elab.amortizaplus.presentation.screens.simulation.validation.Simulati
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SimulationViewModel(
@@ -114,6 +115,7 @@ class SimulationViewModel(
         viewModelScope.launch {
             _uiState.value = SimulationUiState.Loading
             try {
+                delay(400)
                 val simulation = Simulation(
                     loanAmount = inputData.loanAmount,
                     interestRate = inputData.interestRate,

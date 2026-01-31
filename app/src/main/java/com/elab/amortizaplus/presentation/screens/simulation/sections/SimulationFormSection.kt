@@ -116,7 +116,7 @@ fun SimulationFormSection(
             onValueChange = actions.onStartDateChange,
             label = SimulationTexts.startDateLabel,
             placeholder = SimulationTexts.startDatePlaceholder,
-            variant = TextFieldVariant.Default,
+            variant = TextFieldVariant.MonthYear,
             supportingText = formState.startDateError,
             isError = formState.startDateError != null,
             showSuccessIcon = formState.startDateError == null && formState.startDate.isNotBlank()

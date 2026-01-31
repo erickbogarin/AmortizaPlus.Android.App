@@ -1,8 +1,7 @@
 package com.elab.amortizaplus.presentation.screens.simulation.validation
 
 import com.elab.amortizaplus.presentation.util.ValidationResult
-import java.time.LocalDate
-import java.time.format.DateTimeParseException
+import java.time.YearMonth
 
 /**
  * Responsável por validar os campos do formulário de simulação.
@@ -74,11 +73,18 @@ class SimulationInputValidator {
             return ValidationResult(false, "Campo obrigatório")
         }
 
+        val raw = value.filter { it.isDigit() }
+        if (raw.length != 6) {
+            return ValidationResult(false, "Data inválida (use MM/AAAA)")
+        }
+
         return try {
-            LocalDate.parse(value)
+            val month = raw.substring(0, 2).toInt()
+            val year = raw.substring(2, 6).toInt()
+            YearMonth.of(year, month)
             ValidationResult(true)
-        } catch (e: DateTimeParseException) {
-            ValidationResult(false, "Data inválida (use AAAA-MM-DD)")
+        } catch (e: Exception) {
+            ValidationResult(false, "Data inválida (use MM/AAAA)")
         }
     }
 }

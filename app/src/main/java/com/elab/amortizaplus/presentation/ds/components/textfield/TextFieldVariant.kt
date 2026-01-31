@@ -25,4 +25,9 @@ enum class TextFieldVariant {
      * Formata como: 12,5%
      */
     Percentage,
+    /**
+     * Campo mês/ano (data de início).
+     * Formata como: 2026-01
+     */
+    MonthYear,
 }

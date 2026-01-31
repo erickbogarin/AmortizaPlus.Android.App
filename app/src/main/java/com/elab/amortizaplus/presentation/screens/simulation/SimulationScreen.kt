@@ -23,6 +23,9 @@ import androidx.compose.ui.Modifier
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationFormSection
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationResultSection
+import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationErrorSection
+import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationInitialSection
+import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationLoadingSection
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,12 +77,19 @@ fun SimulationScreen(
                 )
 
                 when (val state = uiState) {
+                    is SimulationUiState.Initial -> SimulationInitialSection()
+                    is SimulationUiState.Loading -> SimulationLoadingSection()
+                    is SimulationUiState.Error -> SimulationErrorSection(
+                        message = state.message,
+                        onRetry = viewModel::calculate,
+                        onReset = viewModel::reset
+                    )
                     is SimulationUiState.Success -> SimulationResultSection(
                         summaryWithout = state.summaryWithout,
                         summaryWith = state.summaryWith,
-                        onViewDetails = { showTable = true }
+                        onViewDetails = { showTable = true },
+                        onReset = viewModel::reset
                     )
-                    else -> Unit
                 }
             }
         }

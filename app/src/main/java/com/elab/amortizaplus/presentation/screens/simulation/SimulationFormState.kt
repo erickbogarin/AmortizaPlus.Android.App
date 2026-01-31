@@ -10,7 +10,7 @@ data class SimulationFormState(
     val loanAmount: String = "",
     val interestRate: String ="",
     val terms: String = "",
-    val startDate: String = DateProvider.today(),
+    val startDate: String = DateProvider.monthYear(),
     val rateType: InterestRateType = InterestRateType.ANNUAL,
     val system: AmortizationSystem = AmortizationSystem.SAC,
     val extraAmortizations: List<ExtraAmortizationFormItem> = emptyList(),
@@ -39,6 +39,9 @@ data class SimulationFormState(
         return try {
             val loanAmountValue = loanAmount.toLongOrNull() ?: return null
             val basisPoints = interestRate.toLongOrNull() ?: return null
+            val startDateRaw = startDate
+            if (startDateRaw.length != 6) return null
+            val startDateFormatted = "${startDateRaw.substring(2, 6)}-${startDateRaw.substring(0, 2)}"
             val parsedExtras = extraAmortizations
                 .mapNotNull { item ->
                     val month = item.month.toIntOrNull() ?: return@mapNotNull null
@@ -56,7 +59,7 @@ data class SimulationFormState(
                 rateType = rateType,
                 terms = terms.toInt(),
                 system = system,
-                startDate = startDate,
+                startDate = startDateFormatted,
                 extraAmortizations = parsedExtras
             )
         } catch (e: NumberFormatException) {
