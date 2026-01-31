@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -32,8 +34,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.elab.amortizaplus.domain.model.Installment
 import com.elab.amortizaplus.presentation.ds.components.AppButton
+import com.elab.amortizaplus.presentation.ds.components.AppCard
+import com.elab.amortizaplus.presentation.ds.components.AppFinancialInfoRow
 import com.elab.amortizaplus.presentation.ds.components.ButtonVariant
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
+import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
+import com.elab.amortizaplus.presentation.util.formatTerms
 import com.elab.amortizaplus.presentation.util.toCurrencyBR
 
 @Composable
@@ -65,36 +71,48 @@ fun SimulationTableScreen(
         verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
     ) {
         Text(
-            text = "Tabela Detalhada",
-            style = MaterialTheme.typography.titleMedium
+            text = SimulationTexts.tableTitle,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
         )
 
-        Row(
+        Text(
+            text = SimulationTexts.tableSubtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
         ) {
             Text(
                 text = if (showWithExtra) {
-                    "Mostrando: com amortização extra"
+                    SimulationTexts.tableShowingWithExtra
                 } else {
-                    "Mostrando: sem amortização extra"
+                    SimulationTexts.tableShowingWithoutExtra
                 },
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
+            ) {
                 Text(
-                    text = "Com extra",
+                    text = SimulationTexts.tableToggleLabel,
                     style = MaterialTheme.typography.bodySmall
                 )
-                Spacer(Modifier.width(AppSpacing.small))
                 Switch(
                     checked = showWithExtra,
                     onCheckedChange = { showWithExtra = it }
                 )
             }
         }
+
+        TableSummaryCard(data = data)
 
         ColumnSelector(
             selected = selectedColumns,
@@ -110,12 +128,12 @@ fun SimulationTableScreen(
 
         Spacer(Modifier.height(AppSpacing.medium))
 
-        AppButton(
-            text = "Voltar",
-            onClick = onBack,
-            variant = ButtonVariant.Secondary,
-            modifier = Modifier.fillMaxWidth()
-        )
+    AppButton(
+        text = SimulationTexts.tableBackButton,
+        onClick = onBack,
+        variant = ButtonVariant.Secondary,
+        modifier = Modifier.fillMaxWidth()
+    )
     }
 }
 
@@ -123,15 +141,15 @@ private enum class TableColumn(
     val label: String,
     val width: Dp
 ) {
-    Amortization("Amortização", 140.dp),
-    Interest("Juros", 120.dp),
-    Installment("Parcela", 140.dp),
-    ExtraAmortization("Extra", 120.dp),
-    RemainingBalance("Saldo", 160.dp)
+    Amortization(SimulationTexts.tableColumnAmortization, 140.dp),
+    Interest(SimulationTexts.tableColumnInterest, 120.dp),
+    Installment(SimulationTexts.tableColumnInstallment, 140.dp),
+    ExtraAmortization(SimulationTexts.tableColumnExtra, 120.dp),
+    RemainingBalance(SimulationTexts.tableColumnBalance, 160.dp)
 }
 
 private fun Set<TableColumn>.toggle(column: TableColumn): Set<TableColumn> =
-    if (contains(column)) this - column else this + column
+    if (contains(column) && size > 1) this - column else this + column
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,7 +159,7 @@ private fun ColumnSelector(
 ) {
     Column {
         Text(
-            text = "Colunas",
+            text = SimulationTexts.tableColumnsTitle,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
@@ -172,24 +190,63 @@ private fun TableContent(
     val headerColumns = TableColumn.values().filter { selectedColumns.contains(it) }
     val tableWidth = headerColumns.fold(80.dp) { acc, column -> acc + column.width }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(scrollState)
+    AppCard(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.width(tableWidth)) {
-            TableHeaderRow(columns = headerColumns)
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(data) { item ->
-                    TableDataRow(item = item, columns = headerColumns)
-                }
-                item {
-                    TableFooterRow(data = data, columns = headerColumns)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(scrollState)
+        ) {
+            Column(modifier = Modifier.width(tableWidth)) {
+                TableHeaderRow(columns = headerColumns)
+                Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(data) { item ->
+                        TableDataRow(item = item, columns = headerColumns)
+                    }
+                    item {
+                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        TableFooterRow(data = data, columns = headerColumns)
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun TableSummaryCard(data: List<Installment>) {
+    val totals = TableTotals.from(data)
+    AppCard(
+        modifier = Modifier.fillMaxWidth(),
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    ) {
+        Text(
+            text = SimulationTexts.tableSummaryTitle,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(Modifier.height(AppSpacing.extraSmall))
+        AppFinancialInfoRow(
+            label = SimulationTexts.tableSummaryTotalPaid,
+            value = totals.totalPaid.toCurrencyBR()
+        )
+        AppFinancialInfoRow(
+            label = SimulationTexts.tableSummaryTotalInterest,
+            value = totals.interest.toCurrencyBR()
+        )
+        AppFinancialInfoRow(
+            label = SimulationTexts.tableSummaryTotalAmortized,
+            value = totals.totalAmortized.toCurrencyBR()
+        )
+        AppFinancialInfoRow(
+            label = SimulationTexts.tableSummaryTerm,
+            value = totals.months.formatTerms()
+        )
     }
 }
 
@@ -198,12 +255,25 @@ private fun TableHeaderRow(columns: List<TableColumn>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = AppSpacing.extraSmall),
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = AppSpacing.small, vertical = AppSpacing.small),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
     ) {
-        TableCell(text = "Mês", width = 80.dp, bold = true)
+        TableCell(
+            text = SimulationTexts.tableMonthHeader,
+            width = 80.dp,
+            bold = true,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textStyle = MaterialTheme.typography.labelLarge
+        )
         columns.forEach { column ->
-            TableCell(text = column.label, width = column.width, bold = true)
+            TableCell(
+                text = column.label,
+                width = column.width,
+                bold = true,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textStyle = MaterialTheme.typography.labelLarge
+            )
         }
     }
 }
@@ -216,7 +286,14 @@ private fun TableDataRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = AppSpacing.extraSmall),
+            .background(
+                if (item.month % 2 == 0) {
+                    MaterialTheme.colorScheme.surfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.surface
+                }
+            )
+            .padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
     ) {
         TableCell(text = item.month.toString(), width = 80.dp)
@@ -238,15 +315,24 @@ private fun TableFooterRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = AppSpacing.small),
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = AppSpacing.small, vertical = AppSpacing.small),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
     ) {
-        TableCell(text = "Totais", width = 80.dp, bold = true)
+        TableCell(
+            text = SimulationTexts.tableTotalsLabel,
+            width = 80.dp,
+            bold = true,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textStyle = MaterialTheme.typography.labelLarge
+        )
         columns.forEach { column ->
             TableCell(
                 text = totals.valueFor(column),
                 width = column.width,
-                bold = true
+                bold = true,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textStyle = MaterialTheme.typography.labelLarge
             )
         }
     }
@@ -256,12 +342,15 @@ private fun TableFooterRow(
 private fun TableCell(
     text: String,
     width: Dp,
-    bold: Boolean = false
+    bold: Boolean = false,
+    color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
+    textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodySmall
 ) {
     Text(
         text = text,
-        style = MaterialTheme.typography.bodySmall,
+        style = textStyle,
         fontWeight = if (bold) FontWeight.SemiBold else FontWeight.Normal,
+        color = color,
         modifier = Modifier.width(width)
     )
 }
@@ -275,6 +364,9 @@ private fun TableColumn.valueFor(item: Installment): String = when (this) {
 }
 
 private data class TableTotals(
+    val months: Int,
+    val totalPaid: Double,
+    val totalAmortized: Double,
     val amortization: Double,
     val interest: Double,
     val installment: Double,
@@ -283,11 +375,17 @@ private data class TableTotals(
 ) {
     companion object {
         fun from(data: List<Installment>): TableTotals {
+            val amortization = data.sumOf { it.amortization }
+            val extra = data.sumOf { it.extraAmortization }
+            val installment = data.sumOf { it.installment }
             return TableTotals(
-                amortization = data.sumOf { it.amortization },
+                months = data.size,
+                totalPaid = installment + extra,
+                totalAmortized = amortization + extra,
+                amortization = amortization,
                 interest = data.sumOf { it.interest },
-                installment = data.sumOf { it.installment },
-                extra = data.sumOf { it.extraAmortization },
+                installment = installment,
+                extra = extra,
                 remaining = data.lastOrNull()?.remainingBalance ?: 0.0
             )
         }

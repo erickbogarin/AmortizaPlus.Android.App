@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import com.elab.amortizaplus.domain.model.AmortizationSystem
 import com.elab.amortizaplus.domain.model.SimulationSummary
 import com.elab.amortizaplus.presentation.ds.components.AppButton
 import com.elab.amortizaplus.presentation.ds.components.AppFinancialInfoRow
@@ -55,6 +56,7 @@ fun SimulationResultSection(
 
 @Composable
 private fun SummaryWithoutExtraCard(summary: SimulationSummary) {
+    val systemLabel = summary.system.toLabel()
     AppSummaryCard {
         Text(
             text = SimulationTexts.summaryWithoutTitle,
@@ -65,7 +67,7 @@ private fun SummaryWithoutExtraCard(summary: SimulationSummary) {
 
         AppFinancialInfoRow(
             label = SimulationTexts.systemLabel,
-            value = summary.system?.name ?: "-"
+            value = systemLabel
         )
         AppFinancialInfoRow(
             label = SimulationTexts.totalPaidLabel,
@@ -84,6 +86,7 @@ private fun SummaryWithoutExtraCard(summary: SimulationSummary) {
 
 @Composable
 private fun SummaryWithExtraCard(summary: SimulationSummary) {
+    val systemLabel = summary.system.toLabel()
     AppSuccessCard {
         Text(
             text = SimulationTexts.summaryWithTitle,
@@ -94,7 +97,7 @@ private fun SummaryWithExtraCard(summary: SimulationSummary) {
 
         AppFinancialInfoRow(
             label = SimulationTexts.systemLabel,
-            value = summary.system?.name ?: "-"
+            value = systemLabel
         )
         AppFinancialInfoRow(
             label = SimulationTexts.totalPaidLabel,
@@ -131,4 +134,10 @@ private fun SavingsCard(summary: SimulationSummary) {
             value = summary.reducedMonths.formatTerms()
         )
     }
+}
+
+private fun AmortizationSystem?.toLabel(): String = when (this) {
+    AmortizationSystem.SAC -> SimulationTexts.systemSac
+    AmortizationSystem.PRICE -> SimulationTexts.systemPrice
+    null -> SimulationTexts.notAvailable
 }
