@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationFormSection
+import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationResultSection
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,23 +58,13 @@ fun SimulationScreen(
                 isLoading = uiState is SimulationUiState.Loading
             )
 
-            // Transição reativa das seções
-//            AnimatedContent(targetState = uiState, label = "simulation_state") { state ->
-//                when (state) {
-//                    is SimulationUiState.Initial -> Unit
-//                    is SimulationUiState.Loading -> SimulationLoadingSection()
-//                    is SimulationUiState.Success -> SimulationResultSection(
-//                        inputData = state.inputData,
-//                        summaryWithout = state.summaryWithout,
-//                        summaryWith = state.summaryWith,
-//                        onReset = viewModel::reset
-//                    )
-//                    is SimulationUiState.Error -> SimulationErrorSection(
-//                        message = state.message,
-//                        onRetry = viewModel::calculate
-//                    )
-//                }
-//            }
+            when (val state = uiState) {
+                is SimulationUiState.Success -> SimulationResultSection(
+                    summaryWithout = state.summaryWithout,
+                    summaryWith = state.summaryWith
+                )
+                else -> Unit
+            }
         }
     }
 }

@@ -10,6 +10,11 @@ object SimulationTexts {
     val screenTitle = "Simulação de Financiamento"
     val formSectionTitle = "📋 Dados da Simulação"
     val resultSectionTitle = "📊 Resumo da Simulação"
+    val summaryWithoutTitle = "📈 Resumo - Sem Amortização Extra"
+    val summaryWithTitle = "📉 Resumo - Com Amortização Extra"
+    val savingsTitle = "🎯 Economia"
+    val savingsInterestLabel = "Juros"
+    val savingsTermLabel = "Prazo"
     // Campos do formulário
     val loanAmountLabel = "Valor do Empréstimo (R$)"
     val loanAmountPlaceholder = "Ex: 150000"

@@ -30,9 +30,11 @@ data class SimulationFormState(
         }
 
         return try {
+            val loanAmountValue = loanAmount.toLongOrNull() ?: return null
+            val basisPoints = interestRate.toLongOrNull() ?: return null
             SimulationInputData(
-                loanAmount = loanAmount.toDouble(),
-                interestRate = interestRate.percentToDecimal() ?: return null,
+                loanAmount = loanAmountValue / 100.0,
+                interestRate = basisPoints / 10000.0,
                 rateType = rateType,
                 terms = terms.toInt(),
                 system = system,

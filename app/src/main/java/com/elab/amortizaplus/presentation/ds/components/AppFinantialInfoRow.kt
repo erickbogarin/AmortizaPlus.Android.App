@@ -29,7 +29,7 @@ fun AppFinancialInfoRow(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement =  Arrangement.SpaceAround
+        horizontalArrangement =  Arrangement.SpaceBetween
     ) {
         Text(
             text = label,
