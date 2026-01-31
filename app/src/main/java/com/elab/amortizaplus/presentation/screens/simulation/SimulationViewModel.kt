@@ -30,28 +30,25 @@ class SimulationViewModel(
     // -------------------------------------------------------------------------
 
     fun onLoanAmountChange(value: String) {
-        val filtered = value.filter { it.isDigit() || it == '.' || it == ',' }
-        val validation = validator.validateLoanAmount(filtered)
+        val validation = validator.validateLoanAmount(value)
         _formState.value = _formState.value.copy(
-            loanAmount = filtered,
+            loanAmount = value,
             loanAmountError = validation.message
         )
     }
 
     fun onInterestRateChange(value: String) {
-        val filtered = value.filter { it.isDigit() || it == '.' || it == ',' }
-        val validation = validator.validateInterestRate(filtered)
+        val validation = validator.validateInterestRate(value)
         _formState.value = _formState.value.copy(
-            interestRate = filtered,
+            interestRate = value,
             interestRateError = validation.message
         )
     }
 
     fun onTermsChange(value: String) {
-        val filtered = value.filter { it.isDigit() }
-        val validation = validator.validateTerms(filtered)
+        val validation = validator.validateTerms(value)
         _formState.value = _formState.value.copy(
-            terms = filtered,
+            terms = value,
             termsError = validation.message
         )
     }

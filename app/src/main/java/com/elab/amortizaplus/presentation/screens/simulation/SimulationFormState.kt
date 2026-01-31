@@ -2,8 +2,6 @@ package com.elab.amortizaplus.presentation.screens.simulation
 
 import com.elab.amortizaplus.domain.model.AmortizationSystem
 import com.elab.amortizaplus.domain.model.InterestRateType
-import com.elab.amortizaplus.presentation.util.percentToDecimal
-
 data class SimulationFormState(
     val loanAmount: String = "",
     val interestRate: String ="",
