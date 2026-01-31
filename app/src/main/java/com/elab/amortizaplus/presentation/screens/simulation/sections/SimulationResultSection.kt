@@ -5,13 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.elab.amortizaplus.domain.model.SimulationSummary
+import com.elab.amortizaplus.presentation.ds.components.AppButton
 import com.elab.amortizaplus.presentation.ds.components.AppFinancialInfoRow
 import com.elab.amortizaplus.presentation.ds.components.AppSummaryCard
 import com.elab.amortizaplus.presentation.ds.components.AppSuccessCard
@@ -24,7 +24,8 @@ import com.elab.amortizaplus.presentation.util.toCurrencyBR
 fun SimulationResultSection(
     summaryWithout: SimulationSummary,
     summaryWith: SimulationSummary,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onViewDetails: () -> Unit = {}
 ) {
     val showSavings = summaryWith.reducedMonths > 0 || summaryWith.interestSavings > 0.0
 
@@ -42,7 +43,13 @@ fun SimulationResultSection(
 
         if (showSavings) {
             SummaryWithExtraCard(summaryWith)
+            SavingsCard(summaryWith)
         }
+
+        AppButton(
+            text = SimulationTexts.viewTableButton,
+            onClick = onViewDetails
+        )
     }
 }
 
@@ -102,26 +109,26 @@ private fun SummaryWithExtraCard(summary: SimulationSummary) {
             value = summary.totalMonths.formatTerms()
         )
 
-        if (summary.reducedMonths > 0 || summary.interestSavings > 0.0) {
-            Spacer(Modifier.height(AppSpacing.medium))
-            Divider()
-            Spacer(Modifier.height(AppSpacing.small))
+    }
+}
 
-            Text(
-                text = SimulationTexts.savingsTitle,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(AppSpacing.extraSmall))
+@Composable
+private fun SavingsCard(summary: SimulationSummary) {
+    AppSuccessCard {
+        Text(
+            text = SimulationTexts.savingsTitle,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(Modifier.height(AppSpacing.small))
 
-            AppFinancialInfoRow(
-                label = SimulationTexts.savingsInterestLabel,
-                value = summary.interestSavings.toCurrencyBR()
-            )
-            AppFinancialInfoRow(
-                label = SimulationTexts.savingsTermLabel,
-                value = summary.reducedMonths.formatTerms()
-            )
-        }
+        AppFinancialInfoRow(
+            label = SimulationTexts.savingsInterestLabel,
+            value = summary.interestSavings.toCurrencyBR()
+        )
+        AppFinancialInfoRow(
+            label = SimulationTexts.savingsTermLabel,
+            value = summary.reducedMonths.formatTerms()
+        )
     }
 }

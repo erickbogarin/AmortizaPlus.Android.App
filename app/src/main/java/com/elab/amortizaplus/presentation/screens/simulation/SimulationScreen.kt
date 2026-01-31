@@ -16,6 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationFormSection
@@ -32,6 +35,7 @@ fun SimulationScreen(
     val actions = remember(viewModel) {
         SimulationFormActions.from(viewModel)
     }
+    var showTable by rememberSaveable { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -43,27 +47,40 @@ fun SimulationScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(AppSpacing.medium),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
-        ) {
-            // Formulário fixo
-            SimulationFormSection(
-                formState = formState,
-                actions = actions,
-                isLoading = uiState is SimulationUiState.Loading
+        if (showTable && uiState is SimulationUiState.Success) {
+            val state = uiState as SimulationUiState.Success
+            SimulationTableScreen(
+                installmentsWithout = state.installmentsWithout,
+                installmentsWith = state.installmentsWith,
+                onBack = { showTable = false },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
             )
-
-            when (val state = uiState) {
-                is SimulationUiState.Success -> SimulationResultSection(
-                    summaryWithout = state.summaryWithout,
-                    summaryWith = state.summaryWith
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(AppSpacing.medium),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+            ) {
+                // Formulário fixo
+                SimulationFormSection(
+                    formState = formState,
+                    actions = actions,
+                    isLoading = uiState is SimulationUiState.Loading
                 )
-                else -> Unit
+
+                when (val state = uiState) {
+                    is SimulationUiState.Success -> SimulationResultSection(
+                        summaryWithout = state.summaryWithout,
+                        summaryWith = state.summaryWith,
+                        onViewDetails = { showTable = true }
+                    )
+                    else -> Unit
+                }
             }
         }
     }

@@ -43,6 +43,7 @@ object SimulationTexts {
     // Ações
     val calculateButton = "Calcular Simulação"
     val newSimulationButton = "Nova Simulação"
+    val viewTableButton = "Ver Tabela Detalhada"
     // Estados
     val loadingMessage = "Calculando simulação..."
     // Resultados
