@@ -1,6 +1,7 @@
 package com.elab.amortizaplus.presentation.screens.simulation.validation
 
 import com.elab.amortizaplus.presentation.util.ValidationResult
+import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 import java.time.YearMonth
 
 /**
@@ -85,6 +86,35 @@ class SimulationInputValidator {
             ValidationResult(true)
         } catch (e: Exception) {
             ValidationResult(false, "Data inválida (use MM/AAAA)")
+        }
+    }
+
+    fun validateExtraMonth(value: String, terms: Int): ValidationResult {
+        if (value.isBlank()) {
+            return ValidationResult(false, SimulationTexts.extraMonthRequired)
+        }
+
+        val month = value.toIntOrNull()
+            ?: return ValidationResult(false, SimulationTexts.extraMonthInvalid)
+
+        return when {
+            month <= 0 -> ValidationResult(false, SimulationTexts.extraMonthTooLow)
+            month > terms -> ValidationResult(false, "${SimulationTexts.extraMonthTooHighPrefix} $terms")
+            else -> ValidationResult(true)
+        }
+    }
+
+    fun validateExtraAmount(value: String): ValidationResult {
+        if (value.isBlank()) {
+            return ValidationResult(false, SimulationTexts.extraAmountRequired)
+        }
+
+        val cents = value.toLongOrNull()
+            ?: return ValidationResult(false, SimulationTexts.extraAmountInvalid)
+
+        return when {
+            cents <= 0 -> ValidationResult(false, SimulationTexts.extraAmountTooLow)
+            else -> ValidationResult(true)
         }
     }
 }

@@ -47,9 +47,11 @@ class SimulationViewModel(
 
     fun onTermsChange(value: String) {
         val validation = validator.validateTerms(value)
-        _formState.value = _formState.value.copy(
-            terms = value,
-            termsError = validation.message
+        _formState.value = validateExtras(
+            _formState.value.copy(
+                terms = value,
+                termsError = validation.message
+            )
         )
     }
 
@@ -73,14 +75,18 @@ class SimulationViewModel(
         val newItem = ExtraAmortizationFormItem(
             id = System.currentTimeMillis()
         )
-        _formState.value = _formState.value.copy(
-            extraAmortizations = _formState.value.extraAmortizations + newItem
+        _formState.value = validateExtras(
+            _formState.value.copy(
+                extraAmortizations = _formState.value.extraAmortizations + newItem
+            )
         )
     }
 
     fun removeExtraAmortization(id: Long) {
-        _formState.value = _formState.value.copy(
-            extraAmortizations = _formState.value.extraAmortizations.filterNot { it.id == id }
+        _formState.value = validateExtras(
+            _formState.value.copy(
+                extraAmortizations = _formState.value.extraAmortizations.filterNot { it.id == id }
+            )
         )
     }
 
@@ -150,10 +156,66 @@ class SimulationViewModel(
         id: Long,
         transform: (ExtraAmortizationFormItem) -> ExtraAmortizationFormItem
     ) {
-        _formState.value = _formState.value.copy(
-            extraAmortizations = _formState.value.extraAmortizations.map { item ->
-                if (item.id == id) transform(item) else item
-            }
+        _formState.value = validateExtras(
+            _formState.value.copy(
+                extraAmortizations = _formState.value.extraAmortizations.map { item ->
+                    if (item.id == id) transform(item) else item
+                }
+            )
         )
+    }
+
+    private fun validateExtras(state: SimulationFormState): SimulationFormState {
+        val termsValue = state.terms.toIntOrNull()
+        val termsLimit = if (termsValue != null && termsValue > 0) termsValue else 0
+
+        val monthCounts = state.extraAmortizations
+            .mapNotNull { it.month.toIntOrNull() }
+            .groupingBy { it }
+            .eachCount()
+
+        val validated = state.extraAmortizations.map { item ->
+            val monthRaw = item.month
+            val amountRaw = item.amount
+
+            var monthError: String? = null
+            var amountError: String? = null
+
+            val hasMonth = monthRaw.isNotBlank()
+            val hasAmount = amountRaw.isNotBlank()
+
+            if (!hasMonth && !hasAmount) {
+                monthError = null
+                amountError = null
+            } else {
+                if (!hasMonth) {
+                    monthError = validator.validateExtraMonth(monthRaw, termsLimit).message
+                } else if (termsLimit == 0) {
+                    monthError = com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts.extraMonthInvalid
+                } else {
+                    val monthValidation = validator.validateExtraMonth(monthRaw, termsLimit)
+                    monthError = monthValidation.message
+                }
+
+                if (!hasAmount) {
+                    amountError = validator.validateExtraAmount(amountRaw).message
+                } else {
+                    val amountValidation = validator.validateExtraAmount(amountRaw)
+                    amountError = amountValidation.message
+                }
+
+                val monthValue = monthRaw.toIntOrNull()
+                if (monthValue != null && (monthCounts[monthValue] ?: 0) > 1) {
+                    monthError = com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts.extraMonthDuplicate
+                }
+            }
+
+            item.copy(
+                monthError = monthError,
+                amountError = amountError
+            )
+        }
+
+        return state.copy(extraAmortizations = validated)
     }
 }

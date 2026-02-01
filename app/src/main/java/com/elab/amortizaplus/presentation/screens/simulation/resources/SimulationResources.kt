@@ -69,6 +69,15 @@ object SimulationTexts {
     val initialDescription = "Preencha os dados acima e toque em Calcular Simulação."
     val errorTitle = "Não foi possível calcular"
     val errorDescriptionPrefix = "Detalhes:"
+    // Validação extras
+    val extraMonthRequired = "Informe o mês"
+    val extraMonthInvalid = "Mês inválido"
+    val extraMonthTooLow = "Mês deve ser maior que zero"
+    val extraMonthTooHighPrefix = "Mês deve ser ≤"
+    val extraMonthDuplicate = "Mês já usado"
+    val extraAmountRequired = "Informe o valor"
+    val extraAmountInvalid = "Valor inválido"
+    val extraAmountTooLow = "Valor deve ser maior que zero"
     // Estados
     val loadingMessage = "Calculando simulação..."
     // Resultados

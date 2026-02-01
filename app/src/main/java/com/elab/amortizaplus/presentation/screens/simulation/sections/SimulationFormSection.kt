@@ -229,6 +229,8 @@ private fun ExtraAmortizationItem(
                 label = SimulationTexts.extraAmortizationMonthLabel,
                 placeholder = SimulationTexts.extraAmortizationMonthPlaceholder,
                 variant = TextFieldVariant.Number,
+                supportingText = item.monthError,
+                isError = item.monthError != null,
                 modifier = Modifier.weight(1f)
             )
 
@@ -238,6 +240,8 @@ private fun ExtraAmortizationItem(
                 label = SimulationTexts.extraAmortizationAmountLabel,
                 placeholder = SimulationTexts.extraAmortizationAmountPlaceholder,
                 variant = TextFieldVariant.Money,
+                supportingText = item.amountError,
+                isError = item.amountError != null,
                 modifier = Modifier.weight(1f)
             )
         }

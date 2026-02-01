@@ -29,6 +29,7 @@ data class SimulationFormState(
                 && interestRateError == null
                 && termsError == null
                 && startDateError == null
+                && extraAmortizations.all { it.monthError == null && it.amountError == null }
     }
 
     fun toInputData(): SimulationInputData? {
@@ -72,5 +73,7 @@ data class ExtraAmortizationFormItem(
     val id: Long,
     val month: String = "",
     val amount: String = "",
-    val strategy: ExtraAmortizationStrategy = ExtraAmortizationStrategy.REDUCE_TERM
+    val strategy: ExtraAmortizationStrategy = ExtraAmortizationStrategy.REDUCE_TERM,
+    val monthError: String? = null,
+    val amountError: String? = null
 )

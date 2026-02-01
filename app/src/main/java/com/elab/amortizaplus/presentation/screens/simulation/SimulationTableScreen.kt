@@ -283,24 +283,36 @@ private fun TableDataRow(
     item: Installment,
     columns: List<TableColumn>
 ) {
+    val hasExtra = item.extraAmortization > 0.0
+    val rowBackground = when {
+        hasExtra -> MaterialTheme.colorScheme.tertiaryContainer
+        item.month % 2 == 0 -> MaterialTheme.colorScheme.surfaceVariant
+        else -> MaterialTheme.colorScheme.surface
+    }
+    val rowTextColor = if (hasExtra) {
+        MaterialTheme.colorScheme.onTertiaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                if (item.month % 2 == 0) {
-                    MaterialTheme.colorScheme.surfaceVariant
-                } else {
-                    MaterialTheme.colorScheme.surface
-                }
-            )
+            .background(rowBackground)
             .padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
     ) {
-        TableCell(text = item.month.toString(), width = 80.dp)
+        TableCell(
+            text = item.month.toString(),
+            width = 80.dp,
+            bold = hasExtra,
+            color = rowTextColor
+        )
         columns.forEach { column ->
             TableCell(
                 text = column.valueFor(item),
-                width = column.width
+                width = column.width,
+                bold = hasExtra,
+                color = rowTextColor
             )
         }
     }
