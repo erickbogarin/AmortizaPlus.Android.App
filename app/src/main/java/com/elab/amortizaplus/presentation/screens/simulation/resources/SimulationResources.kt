@@ -64,6 +64,8 @@ object SimulationTexts {
     val tableSummaryTotalInterest = "Total de Juros"
     val tableSummaryTotalAmortized = "Total Amortizado"
     val tableSummaryTerm = "Prazo"
+    val tableMissingTitle = "Sem simulação disponível"
+    val tableMissingMessage = "Volte e calcule uma simulação para ver a tabela detalhada."
     // Estados
     val initialTitle = "Pronto para simular?"
     val initialDescription = "Preencha os dados acima e toque em Calcular Simulação."

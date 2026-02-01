@@ -19,6 +19,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,76 +65,82 @@ fun SimulationTableScreen(
     val selectedColumns = selectedColumnsState.value
     val data = if (showWithExtra) installmentsWith else installmentsWithout
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(AppSpacing.medium),
-        verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
-    ) {
-        Text(
-            text = SimulationTexts.tableTitle,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Text(
-            text = SimulationTexts.tableSubtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        bottomBar = {
+            AppButton(
+                text = SimulationTexts.tableBackButton,
+                onClick = onBack,
+                variant = ButtonVariant.Secondary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(AppSpacing.medium)
+            )
+        }
+    ) { padding ->
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(AppSpacing.medium),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
         ) {
             Text(
-                text = if (showWithExtra) {
-                    SimulationTexts.tableShowingWithExtra
-                } else {
-                    SimulationTexts.tableShowingWithoutExtra
-                },
+                text = SimulationTexts.tableTitle,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = SimulationTexts.tableSubtitle,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
             ) {
                 Text(
-                    text = SimulationTexts.tableToggleLabel,
-                    style = MaterialTheme.typography.bodySmall
+                    text = if (showWithExtra) {
+                        SimulationTexts.tableShowingWithExtra
+                    } else {
+                        SimulationTexts.tableShowingWithoutExtra
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Switch(
-                    checked = showWithExtra,
-                    onCheckedChange = { showWithExtra = it }
-                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
+                ) {
+                    Text(
+                        text = SimulationTexts.tableToggleLabel,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Switch(
+                        checked = showWithExtra,
+                        onCheckedChange = { showWithExtra = it }
+                    )
+                }
             }
+
+            TableSummaryCard(data = data)
+
+            ColumnSelector(
+                selected = selectedColumns,
+                onToggle = { column ->
+                    selectedColumnsState.value = selectedColumns.toggle(column)
+                }
+            )
+
+            TableContent(
+                data = data,
+                selectedColumns = selectedColumns
+            )
         }
-
-        TableSummaryCard(data = data)
-
-        ColumnSelector(
-            selected = selectedColumns,
-            onToggle = { column ->
-                selectedColumnsState.value = selectedColumns.toggle(column)
-            }
-        )
-
-        TableContent(
-            data = data,
-            selectedColumns = selectedColumns
-        )
-
-        Spacer(Modifier.height(AppSpacing.medium))
-
-    AppButton(
-        text = SimulationTexts.tableBackButton,
-        onClick = onBack,
-        variant = ButtonVariant.Secondary,
-        modifier = Modifier.fillMaxWidth()
-    )
     }
 }
 

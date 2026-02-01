@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,10 +18,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationFormSection
@@ -28,9 +29,10 @@ import com.elab.amortizaplus.presentation.screens.simulation.sections.Simulation
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationLoadingSection
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SimulationScreen(
+    onViewDetails: () -> Unit,
     viewModel: SimulationViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -38,7 +40,7 @@ fun SimulationScreen(
     val actions = remember(viewModel) {
         SimulationFormActions.from(viewModel)
     }
-    var showTable by rememberSaveable { mutableStateOf(false) }
+    val resultsRequester = remember { BringIntoViewRequester() }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -50,48 +52,43 @@ fun SimulationScreen(
             )
         }
     ) { padding ->
-        if (showTable && uiState is SimulationUiState.Success) {
-            val state = uiState as SimulationUiState.Success
-            SimulationTableScreen(
-                installmentsWithout = state.installmentsWithout,
-                installmentsWith = state.installmentsWith,
-                onBack = { showTable = false },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(AppSpacing.medium),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+        ) {
+            // Formulário fixo
+            SimulationFormSection(
+                formState = formState,
+                actions = actions,
+                isLoading = uiState is SimulationUiState.Loading
             )
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(AppSpacing.medium),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
-            ) {
-                // Formulário fixo
-                SimulationFormSection(
-                    formState = formState,
-                    actions = actions,
-                    isLoading = uiState is SimulationUiState.Loading
-                )
 
-                when (val state = uiState) {
-                    is SimulationUiState.Initial -> SimulationInitialSection()
-                    is SimulationUiState.Loading -> SimulationLoadingSection()
-                    is SimulationUiState.Error -> SimulationErrorSection(
-                        message = state.message,
-                        onRetry = viewModel::calculate,
-                        onReset = viewModel::reset
-                    )
-                    is SimulationUiState.Success -> SimulationResultSection(
-                        summaryWithout = state.summaryWithout,
-                        summaryWith = state.summaryWith,
-                        onViewDetails = { showTable = true },
-                        onReset = viewModel::reset
-                    )
-                }
+            when (val state = uiState) {
+                is SimulationUiState.Initial -> SimulationInitialSection()
+                is SimulationUiState.Loading -> SimulationLoadingSection()
+                is SimulationUiState.Error -> SimulationErrorSection(
+                    message = state.message,
+                    onRetry = viewModel::calculate,
+                    onReset = viewModel::reset
+                )
+                is SimulationUiState.Success -> SimulationResultSection(
+                    summaryWithout = state.summaryWithout,
+                    summaryWith = state.summaryWith,
+                    onViewDetails = onViewDetails,
+                    onReset = viewModel::reset,
+                    modifier = Modifier.bringIntoViewRequester(resultsRequester)
+                )
             }
+        }
+    }
+
+    LaunchedEffect(uiState) {
+        if (uiState is SimulationUiState.Success) {
+            resultsRequester.bringIntoView()
         }
     }
 }
