@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -111,7 +112,8 @@ fun HistoryScreen(
                         ) { saved ->
                             HistoryItemCard(
                                 saved = saved,
-                                onClick = { onSimulationClick(saved.id) }
+                                onClick = { onSimulationClick(saved.id) },
+                                onDelete = { viewModel.deleteSimulation(saved.id) }
                             )
                         }
                     }
@@ -124,7 +126,8 @@ fun HistoryScreen(
 @Composable
 private fun HistoryItemCard(
     saved: SavedSimulation,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onDelete: () -> Unit
 ) {
     AppCard(
         modifier = Modifier.clickable(onClick = onClick)
@@ -147,6 +150,16 @@ private fun HistoryItemCard(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            AppButton(
+                text = SimulationTexts.historyDeleteButton,
+                onClick = onDelete,
+                variant = ButtonVariant.Text
+            )
+        }
     }
 }
 

@@ -30,20 +30,12 @@ class SimulationViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val repository = FakeSimulationHistoryRepository()
-    private val calculateUseCase = CalculateFinancingUseCase(
-        financingCalculator = FinancingCalculator(
-            sacCalculator = SacCalculator(),
-            priceCalculator = PriceCalculator()
-        )
-    )
-    private val saveUseCase = SaveSimulationUseCase(repository)
-    private val getByIdUseCase = GetSimulationByIdUseCase(repository)
     private val validator = SimulationInputValidator()
 
     @Test
     fun `calculate should auto save simulation on success`() = runTest {
-        val viewModel = buildViewModel()
+        val deps = buildViewModel()
+        val viewModel = deps.viewModel
 
         viewModel.onLoanAmountChange("25000000")
         viewModel.onInterestRateChange("1300")
@@ -54,13 +46,15 @@ class SimulationViewModelTest {
         advanceTimeBy(500)
         advanceUntilIdle()
 
-        val saved = repository.getAllSimulations().getOrNull().orEmpty()
+        val saved = deps.repository.getAllSimulations().getOrNull().orEmpty()
         assertEquals(1, saved.size)
         assertTrue(viewModel.uiState.value is SimulationUiState.Success)
     }
 
     @Test
     fun `loadSavedSimulation should map domain model to raw form values`() = runTest {
+        val deps = buildViewModel()
+        val viewModel = deps.viewModel
         val saved = SavedSimulation(
             id = "saved-1",
             name = "Teste",
@@ -90,8 +84,7 @@ class SimulationViewModelTest {
                 )
             )
         )
-        repository.saveSimulation(saved)
-        val viewModel = buildViewModel()
+        deps.repository.saveSimulation(saved)
 
         viewModel.loadSavedSimulation("saved-1")
         advanceUntilIdle()
@@ -106,7 +99,8 @@ class SimulationViewModelTest {
 
     @Test
     fun `loadSavedSimulation should set error when id does not exist`() = runTest {
-        val viewModel = buildViewModel()
+        val deps = buildViewModel()
+        val viewModel = deps.viewModel
 
         viewModel.loadSavedSimulation("not-found")
         advanceUntilIdle()
@@ -115,12 +109,28 @@ class SimulationViewModelTest {
         assertEquals(SimulationTexts.historyNotFound, uiState.message)
     }
 
-    private fun buildViewModel(): SimulationViewModel {
-        return SimulationViewModel(
+    private fun buildViewModel(): TestDeps {
+        val repository = FakeSimulationHistoryRepository()
+        val calculateUseCase = CalculateFinancingUseCase(
+            financingCalculator = FinancingCalculator(
+                sacCalculator = SacCalculator(),
+                priceCalculator = PriceCalculator()
+            )
+        )
+        val saveUseCase = SaveSimulationUseCase(repository)
+        val getByIdUseCase = GetSimulationByIdUseCase(repository)
+
+        val viewModel = SimulationViewModel(
             calculateFinancingUseCase = calculateUseCase,
             validator = validator,
             saveSimulationUseCase = saveUseCase,
             getSimulationByIdUseCase = getByIdUseCase
         )
+        return TestDeps(viewModel = viewModel, repository = repository)
     }
+
+private data class TestDeps(
+        val viewModel: SimulationViewModel,
+        val repository: FakeSimulationHistoryRepository
+    )
 }

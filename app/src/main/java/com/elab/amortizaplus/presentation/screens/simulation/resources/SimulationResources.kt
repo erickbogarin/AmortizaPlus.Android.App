@@ -75,11 +75,13 @@ object SimulationTexts {
     val historyEmptyMessage = "Calcule uma simulação para começar a montar seu histórico."
     val historyErrorTitle = "Não foi possível carregar o histórico"
     val historyLoadError = "Erro ao carregar histórico"
+    val historyDeleteError = "Erro ao excluir simulação"
     val historyNotFound = "Simulação não encontrada"
     val historyTotalPaidLabel = "Total pago"
     val historyLastModifiedLabel = "Modificado"
     val historyResultTitle = "Resultado"
     val historyUseSimulationButton = "Editar e recalcular"
+    val historyDeleteButton = "Excluir"
     // Estados
     val initialTitle = "Pronto para simular?"
     val initialDescription = "Preencha os dados acima e toque em Calcular Simulação."

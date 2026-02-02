@@ -6,6 +6,7 @@ import com.elab.amortizaplus.domain.calculator.FinancingCalculator
 import com.elab.amortizaplus.domain.calculator.PriceCalculator
 import com.elab.amortizaplus.domain.calculator.SacCalculator
 import com.elab.amortizaplus.domain.usecase.CalculateFinancingUseCase
+import com.elab.amortizaplus.domain.usecase.DeleteSimulationUseCase
 import com.elab.amortizaplus.domain.usecase.GetSimulationByIdUseCase
 import com.elab.amortizaplus.domain.usecase.GetSimulationHistoryUseCase
 import com.elab.amortizaplus.domain.usecase.SaveSimulationUseCase
@@ -49,6 +50,7 @@ val useCaseModule = module {
     factory { SaveSimulationUseCase(get()) }
     factory { GetSimulationHistoryUseCase(get()) }
     factory { GetSimulationByIdUseCase(get()) }
+    factory { DeleteSimulationUseCase(get()) }
 }
 
 // -------------------------------------------------------------------------
@@ -70,7 +72,12 @@ val viewModelModule = module {
             getSimulationByIdUseCase = get()
         )
     }
-    viewModel { HistoryViewModel(getSimulationHistoryUseCase = get()) }
+    viewModel {
+        HistoryViewModel(
+            getSimulationHistoryUseCase = get(),
+            deleteSimulationUseCase = get()
+        )
+    }
     viewModel { HistoryDetailViewModel(getSimulationByIdUseCase = get()) }
 }
 

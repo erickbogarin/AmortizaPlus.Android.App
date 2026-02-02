@@ -2,6 +2,7 @@ package com.elab.amortizaplus.presentation.screens.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.elab.amortizaplus.domain.usecase.DeleteSimulationUseCase
 import com.elab.amortizaplus.domain.usecase.GetSimulationByIdUseCase
 import com.elab.amortizaplus.domain.usecase.GetSimulationHistoryUseCase
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
@@ -13,7 +14,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class HistoryViewModel(
-    private val getSimulationHistoryUseCase: GetSimulationHistoryUseCase
+    private val getSimulationHistoryUseCase: GetSimulationHistoryUseCase,
+    private val deleteSimulationUseCase: DeleteSimulationUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<HistoryUiState>(HistoryUiState.Initial)
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
@@ -25,6 +27,14 @@ class HistoryViewModel(
 
     fun retry() {
         observeHistory()
+    }
+
+    fun deleteSimulation(id: String) {
+        viewModelScope.launch {
+            deleteSimulationUseCase(id).onFailure {
+                _uiState.value = HistoryUiState.Error(SimulationTexts.historyDeleteError)
+            }
+        }
     }
 
     private fun observeHistory() {
@@ -78,4 +88,5 @@ class HistoryDetailViewModel(
             )
         }
     }
+
 }
