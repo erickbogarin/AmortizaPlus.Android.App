@@ -10,6 +10,8 @@ import com.elab.amortizaplus.domain.usecase.GetSimulationByIdUseCase
 import com.elab.amortizaplus.domain.usecase.GetSimulationHistoryUseCase
 import com.elab.amortizaplus.domain.usecase.SaveSimulationUseCase
 import com.elab.amortizaplus.domain.repository.SimulationHistoryRepository
+import com.elab.amortizaplus.presentation.screens.history.HistoryDetailViewModel
+import com.elab.amortizaplus.presentation.screens.history.HistoryViewModel
 import com.elab.amortizaplus.presentation.screens.simulation.SimulationViewModel
 import com.elab.amortizaplus.presentation.screens.simulation.validation.SimulationInputValidator
 
@@ -66,6 +68,8 @@ val viewModelModule = module {
             validator = get(),
         )
     }
+    viewModel { HistoryViewModel(getSimulationHistoryUseCase = get()) }
+    viewModel { HistoryDetailViewModel(getSimulationByIdUseCase = get()) }
 }
 
 // -------------------------------------------------------------------------

@@ -9,7 +9,11 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,6 +38,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SimulationScreen(
     onViewDetails: () -> Unit,
+    onViewHistory: () -> Unit,
     viewModel: SimulationViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -46,6 +51,14 @@ fun SimulationScreen(
         topBar = {
             TopAppBar(
                 title = { Text(SimulationTexts.screenTitle) },
+                actions = {
+                    IconButton(onClick = onViewHistory) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = SimulationTexts.historyTitle
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
