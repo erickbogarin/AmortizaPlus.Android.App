@@ -66,6 +66,8 @@ val viewModelModule = module {
         SimulationViewModel(
             calculateFinancingUseCase = get(),
             validator = get(),
+            saveSimulationUseCase = get(),
+            getSimulationByIdUseCase = get()
         )
     }
     viewModel { HistoryViewModel(getSimulationHistoryUseCase = get()) }

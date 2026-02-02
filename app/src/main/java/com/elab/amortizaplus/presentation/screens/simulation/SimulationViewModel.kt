@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.elab.amortizaplus.domain.model.InterestRateType
 import com.elab.amortizaplus.domain.model.Simulation
 import com.elab.amortizaplus.domain.usecase.CalculateFinancingUseCase
+import com.elab.amortizaplus.domain.usecase.GetSimulationByIdUseCase
+import com.elab.amortizaplus.domain.usecase.SaveSimulationUseCase
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 import com.elab.amortizaplus.presentation.screens.simulation.validation.SimulationInputValidator
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,11 +14,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.roundToLong
 
 class SimulationViewModel(
     private val calculateFinancingUseCase: CalculateFinancingUseCase,
     private val validator: SimulationInputValidator,
-
+    private val saveSimulationUseCase: SaveSimulationUseCase,
+    private val getSimulationByIdUseCase: GetSimulationByIdUseCase
 ): ViewModel() {
     private val _formState = MutableStateFlow(SimulationFormState())
 
@@ -142,11 +146,55 @@ class SimulationViewModel(
                     installmentsWithout = result.paymentsWithoutExtra,
                     installmentsWith = result.paymentsWithExtra
                 )
+
+                // Persistência assíncrona: não bloqueia nem altera sucesso do cálculo.
+                saveSimulationUseCase(
+                    simulation = simulation,
+                    result = result
+                )
             } catch (e: Exception) {
                 _uiState.value = SimulationUiState.Error(
                     "${SimulationTexts.calculationErrorPrefix} ${e.message}"
                 )
             }
+        }
+    }
+
+    fun loadSavedSimulation(id: String) {
+        if (id.isBlank()) return
+
+        viewModelScope.launch {
+            _uiState.value = SimulationUiState.Loading
+            val loadResult = getSimulationByIdUseCase(id)
+
+            loadResult.fold(
+                onSuccess = { saved ->
+                    if (saved == null) {
+                        _uiState.value = SimulationUiState.Error(SimulationTexts.historyNotFound)
+                        return@fold
+                    }
+
+                    _formState.value = buildFormStateFromSimulation(saved.simulation)
+
+                    try {
+                        val calculated = calculateFinancingUseCase(saved.simulation)
+                        _uiState.value = SimulationUiState.Success(
+                            inputData = saved.simulation.toInputData(),
+                            summaryWithout = calculated.summaryWithoutExtra,
+                            summaryWith = calculated.summaryWithExtra,
+                            installmentsWithout = calculated.paymentsWithoutExtra,
+                            installmentsWith = calculated.paymentsWithExtra
+                        )
+                    } catch (e: Exception) {
+                        _uiState.value = SimulationUiState.Error(
+                            "${SimulationTexts.calculationErrorPrefix} ${e.message}"
+                        )
+                    }
+                },
+                onFailure = {
+                    _uiState.value = SimulationUiState.Error(SimulationTexts.historyLoadError)
+                }
+            )
         }
     }
 
@@ -166,6 +214,66 @@ class SimulationViewModel(
                 }
             )
         )
+    }
+
+    private fun buildFormStateFromSimulation(simulation: Simulation): SimulationFormState {
+        val loadedExtras = simulation.extraAmortizations.mapIndexed { index, extra ->
+            ExtraAmortizationFormItem(
+                id = System.currentTimeMillis() + index,
+                month = extra.month.toString(),
+                amount = (extra.amount * 100).roundToLong().toString(),
+                strategy = extra.strategy
+            )
+        }
+
+        val rawLoanAmount = (simulation.loanAmount * 100).roundToLong().toString()
+        val rawInterestRate = (simulation.interestRate * 10_000).roundToLong().toString()
+        val rawTerms = simulation.terms.toString()
+        val rawStartDate = simulation.startDate.toRawMonthYear()
+
+        val state = SimulationFormState(
+            loanAmount = rawLoanAmount,
+            interestRate = rawInterestRate,
+            terms = rawTerms,
+            startDate = rawStartDate,
+            rateType = simulation.rateType,
+            system = simulation.amortizationSystem,
+            extraAmortizations = loadedExtras,
+            loanAmountError = validator.validateLoanAmount(rawLoanAmount).message,
+            interestRateError = validator.validateInterestRate(rawInterestRate).message,
+            termsError = validator.validateTerms(rawTerms).message,
+            startDateError = validator.validateStartDate(rawStartDate).message
+        )
+
+        return validateExtras(state)
+    }
+
+    private fun Simulation.toInputData(): SimulationInputData {
+        return SimulationInputData(
+            loanAmount = loanAmount,
+            interestRate = interestRate,
+            rateType = rateType,
+            terms = terms,
+            system = amortizationSystem,
+            startDate = startDate,
+            extraAmortizations = extraAmortizations
+        )
+    }
+
+    private fun String.toRawMonthYear(): String {
+        val parts = split("-")
+        if (parts.size == 2 && parts[0].length == 4) {
+            val year = parts[0]
+            val month = parts[1].padStart(2, '0')
+            return "$month$year"
+        }
+
+        val digits = filter { it.isDigit() }
+        if (digits.length == 6) {
+            return digits
+        }
+
+        return this
     }
 
     private fun validateExtras(state: SimulationFormState): SimulationFormState {

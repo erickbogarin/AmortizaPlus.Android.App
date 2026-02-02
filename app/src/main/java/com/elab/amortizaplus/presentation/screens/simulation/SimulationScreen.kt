@@ -39,6 +39,7 @@ import org.koin.androidx.compose.koinViewModel
 fun SimulationScreen(
     onViewDetails: () -> Unit,
     onViewHistory: () -> Unit,
+    selectedSimulationId: String? = null,
     viewModel: SimulationViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -103,6 +104,12 @@ fun SimulationScreen(
     LaunchedEffect(uiState) {
         if (uiState is SimulationUiState.Success) {
             resultsRequester.bringIntoView()
+        }
+    }
+
+    LaunchedEffect(selectedSimulationId) {
+        selectedSimulationId?.takeIf { it.isNotBlank() }?.let { simulationId ->
+            viewModel.loadSavedSimulation(simulationId)
         }
     }
 }

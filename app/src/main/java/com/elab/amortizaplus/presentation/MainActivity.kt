@@ -32,14 +32,26 @@ private fun AppNavHost() {
         navController = navController,
         startDestination = AppRoutes.SIMULATION
     ) {
-        composable(AppRoutes.SIMULATION) {
+        composable(
+            route = AppRoutes.SIMULATION_ROUTE,
+            arguments = listOf(
+                navArgument(AppRoutes.SAVED_SIMULATION_ID_ARG) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val selectedSimulationId =
+                backStackEntry.arguments?.getString(AppRoutes.SAVED_SIMULATION_ID_ARG)
             SimulationScreen(
                 onViewDetails = { navController.navigate(AppRoutes.TABLE) },
-                onViewHistory = { navController.navigate(AppRoutes.HISTORY) }
+                onViewHistory = { navController.navigate(AppRoutes.HISTORY) },
+                selectedSimulationId = selectedSimulationId
             )
         }
         composable(AppRoutes.TABLE) {
-            val parentEntry = remember { navController.getBackStackEntry(AppRoutes.SIMULATION) }
+            val parentEntry = remember { navController.getBackStackEntry(AppRoutes.SIMULATION_ROUTE) }
             SimulationTableRoute(
                 onBack = { navController.popBackStack() },
                 parentEntry = parentEntry
@@ -60,6 +72,9 @@ private fun AppNavHost() {
             val simulationId = backStackEntry.arguments?.getString("simulationId").orEmpty()
             HistoryDetailScreen(
                 simulationId = simulationId,
+                onUseSimulation = { selectedId ->
+                    navController.navigate(AppRoutes.simulationWithSavedId(selectedId))
+                },
                 onBack = { navController.popBackStack() }
             )
         }
@@ -68,7 +83,13 @@ private fun AppNavHost() {
 
 private object AppRoutes {
     const val SIMULATION = "simulation"
+    const val SAVED_SIMULATION_ID_ARG = "savedSimulationId"
+    const val SIMULATION_ROUTE = "$SIMULATION?$SAVED_SIMULATION_ID_ARG={$SAVED_SIMULATION_ID_ARG}"
     const val TABLE = "table"
     const val HISTORY = "history"
     const val HISTORY_DETAIL = "history_detail"
+
+    fun simulationWithSavedId(id: String): String {
+        return "$SIMULATION?$SAVED_SIMULATION_ID_ARG=$id"
+    }
 }

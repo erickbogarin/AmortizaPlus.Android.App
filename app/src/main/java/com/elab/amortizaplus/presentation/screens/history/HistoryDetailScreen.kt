@@ -36,6 +36,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HistoryDetailScreen(
     simulationId: String,
+    onUseSimulation: (String) -> Unit,
     onBack: () -> Unit,
     viewModel: HistoryDetailViewModel = koinViewModel()
 ) {
@@ -91,6 +92,7 @@ fun HistoryDetailScreen(
 
                 is HistoryDetailUiState.Success -> HistoryDetailContent(
                     saved = state.simulation,
+                    onUseSimulation = onUseSimulation,
                     onBack = onBack
                 )
             }
@@ -101,6 +103,7 @@ fun HistoryDetailScreen(
 @Composable
 private fun HistoryDetailContent(
     saved: SavedSimulation,
+    onUseSimulation: (String) -> Unit,
     onBack: () -> Unit
 ) {
     AppCard {
@@ -144,6 +147,11 @@ private fun HistoryDetailContent(
             value = saved.result.summaryWithExtra.totalMonths.formatTerms()
         )
     }
+
+    AppButton(
+        text = SimulationTexts.historyUseSimulationButton,
+        onClick = { onUseSimulation(saved.id) }
+    )
 
     AppButton(
         text = SimulationTexts.historyBackButton,

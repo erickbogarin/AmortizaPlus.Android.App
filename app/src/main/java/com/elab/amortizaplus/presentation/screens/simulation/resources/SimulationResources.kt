@@ -79,6 +79,7 @@ object SimulationTexts {
     val historyTotalPaidLabel = "Total pago"
     val historyLastModifiedLabel = "Modificado"
     val historyResultTitle = "Resultado"
+    val historyUseSimulationButton = "Editar e recalcular"
     // Estados
     val initialTitle = "Pronto para simular?"
     val initialDescription = "Preencha os dados acima e toque em Calcular Simulação."

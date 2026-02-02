@@ -46,5 +46,6 @@ dependencies {
     implementation(libs.koin.compose)
     implementation(libs.datastore.preferences)
     testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
     debugImplementation(libs.compose.ui.tooling)
 }
