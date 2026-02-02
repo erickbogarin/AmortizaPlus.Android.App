@@ -231,6 +231,7 @@ private fun ExtraAmortizationItem(
                 variant = TextFieldVariant.Number,
                 supportingText = item.monthError,
                 isError = item.monthError != null,
+                showSuccessIcon = item.monthError == null && item.month.isNotBlank(),
                 modifier = Modifier.weight(1f)
             )
 
@@ -242,6 +243,7 @@ private fun ExtraAmortizationItem(
                 variant = TextFieldVariant.Money,
                 supportingText = item.amountError,
                 isError = item.amountError != null,
+                showSuccessIcon = item.amountError == null && item.amount.isNotBlank(),
                 modifier = Modifier.weight(1f)
             )
         }

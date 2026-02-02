@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
+import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationFormSection
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationResultSection
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationErrorSection
@@ -44,7 +45,7 @@ fun SimulationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Simulação de Financiamento") },
+                title = { Text(SimulationTexts.screenTitle) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary

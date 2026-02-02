@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.elab.amortizaplus.domain.model.InterestRateType
 import com.elab.amortizaplus.domain.model.Simulation
 import com.elab.amortizaplus.domain.usecase.CalculateFinancingUseCase
+import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 import com.elab.amortizaplus.presentation.screens.simulation.validation.SimulationInputValidator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -108,13 +109,13 @@ class SimulationViewModel(
 
     fun calculate() {
         if (!_formState.value.isValid()) {
-            _uiState.value = SimulationUiState.Error("Por favor, preencha todos os campos corretamente")
+            _uiState.value = SimulationUiState.Error(SimulationTexts.formInvalidMessage)
             return
         }
 
         val inputData = _formState.value.toInputData()
         if (inputData == null) {
-            _uiState.value = SimulationUiState.Error("Erro ao processar dados de entrada")
+            _uiState.value = SimulationUiState.Error(SimulationTexts.inputProcessingError)
             return
         }
 
@@ -130,7 +131,7 @@ class SimulationViewModel(
                     startDate = inputData.startDate,
                     amortizationSystem = inputData.system,
                     extraAmortizations = inputData.extraAmortizations,
-                    name = "Simulação ${System.currentTimeMillis()}"
+                    name = "${SimulationTexts.simulationNamePrefix} ${System.currentTimeMillis()}"
                 )
 
                 val result = calculateFinancingUseCase(simulation)
@@ -142,7 +143,9 @@ class SimulationViewModel(
                     installmentsWith = result.paymentsWithExtra
                 )
             } catch (e: Exception) {
-                _uiState.value = SimulationUiState.Error("Erro ao calcular: ${e.message}")
+                _uiState.value = SimulationUiState.Error(
+                    "${SimulationTexts.calculationErrorPrefix} ${e.message}"
+                )
             }
         }
     }
@@ -178,36 +181,28 @@ class SimulationViewModel(
             val monthRaw = item.month
             val amountRaw = item.amount
 
-            var monthError: String? = null
-            var amountError: String? = null
-
             val hasMonth = monthRaw.isNotBlank()
             val hasAmount = amountRaw.isNotBlank()
 
-            if (!hasMonth && !hasAmount) {
-                monthError = null
-                amountError = null
+            val (monthError, amountError) = if (!hasMonth && !hasAmount) {
+                null to null
             } else {
-                if (!hasMonth) {
-                    monthError = validator.validateExtraMonth(monthRaw, termsLimit).message
+                var computedMonthError = if (!hasMonth) {
+                    validator.validateExtraMonth(monthRaw, termsLimit).message
                 } else if (termsLimit == 0) {
-                    monthError = com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts.extraMonthInvalid
+                    SimulationTexts.extraMonthInvalid
                 } else {
-                    val monthValidation = validator.validateExtraMonth(monthRaw, termsLimit)
-                    monthError = monthValidation.message
+                    validator.validateExtraMonth(monthRaw, termsLimit).message
                 }
 
-                if (!hasAmount) {
-                    amountError = validator.validateExtraAmount(amountRaw).message
-                } else {
-                    val amountValidation = validator.validateExtraAmount(amountRaw)
-                    amountError = amountValidation.message
-                }
+                val computedAmountError = validator.validateExtraAmount(amountRaw).message
 
                 val monthValue = monthRaw.toIntOrNull()
                 if (monthValue != null && (monthCounts[monthValue] ?: 0) > 1) {
-                    monthError = com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts.extraMonthDuplicate
+                    computedMonthError = SimulationTexts.extraMonthDuplicate
                 }
+
+                computedMonthError to computedAmountError
             }
 
             item.copy(

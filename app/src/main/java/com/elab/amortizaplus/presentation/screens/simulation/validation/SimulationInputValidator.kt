@@ -19,18 +19,18 @@ class SimulationInputValidator {
 
     fun validateLoanAmount(value: String): ValidationResult {
         if (value.isBlank()) {
-            return ValidationResult(false, "Campo obrigatório")
+            return ValidationResult(false, SimulationTexts.requiredField)
         }
 
         // valor em centavos!
         val centavos = value.toLongOrNull()
-            ?: return ValidationResult(false, "Valor inválido")
+            ?: return ValidationResult(false, SimulationTexts.invalidValue)
 
         val amount = centavos / 100.0  // agora sim → reais
 
         return when {
-            amount <= 0 -> ValidationResult(false, "Valor deve ser maior que zero")
-            amount > 10_000_000 -> ValidationResult(false, "Valor máximo: R$ 10.000.000")
+            amount <= 0 -> ValidationResult(false, SimulationTexts.valueMustBeGreaterThanZero)
+            amount > 10_000_000 -> ValidationResult(false, SimulationTexts.loanAmountMax)
             else -> ValidationResult(true)
         }
     }
@@ -38,45 +38,45 @@ class SimulationInputValidator {
 
     fun validateInterestRate(rawValue: String): ValidationResult {
         if (rawValue.isBlank()) {
-            return ValidationResult(false, "Campo obrigatório")
+            return ValidationResult(false, SimulationTexts.requiredField)
         }
 
         // rawValue ex.: "1300" → 13.00%
         val basisPoints = rawValue.toLongOrNull()
-            ?: return ValidationResult(false, "Taxa inválida")
+            ?: return ValidationResult(false, SimulationTexts.invalidRate)
 
         val rate = basisPoints / 100.0  // agora sim → 13.00
 
         return when {
-            rate <= 0 -> ValidationResult(false, "Taxa deve ser maior que zero")
-            rate > 30 -> ValidationResult(false, "Taxa máxima: 30%")
+            rate <= 0 -> ValidationResult(false, SimulationTexts.rateMustBeGreaterThanZero)
+            rate > 30 -> ValidationResult(false, SimulationTexts.maxRate)
             else -> ValidationResult(true)
         }
     }
 
     fun validateTerms(value: String): ValidationResult {
         if (value.isBlank()) {
-            return ValidationResult(false, "Campo obrigatório")
+            return ValidationResult(false, SimulationTexts.requiredField)
         }
 
         val terms = value.toIntOrNull()
-            ?: return ValidationResult(false, "Prazo inválido")
+            ?: return ValidationResult(false, SimulationTexts.invalidTerms)
 
         return when {
-            terms <= 0 -> ValidationResult(false, "Prazo deve ser maior que zero")
-            terms > 600 -> ValidationResult(false, "Prazo máximo: 600 meses (50 anos)")
+            terms <= 0 -> ValidationResult(false, SimulationTexts.termsMustBeGreaterThanZero)
+            terms > 600 -> ValidationResult(false, SimulationTexts.maxTerms)
             else -> ValidationResult(true)
         }
     }
 
     fun validateStartDate(value: String): ValidationResult {
         if (value.isBlank()) {
-            return ValidationResult(false, "Campo obrigatório")
+            return ValidationResult(false, SimulationTexts.requiredField)
         }
 
         val raw = value.filter { it.isDigit() }
         if (raw.length != 6) {
-            return ValidationResult(false, "Data inválida (use MM/AAAA)")
+            return ValidationResult(false, SimulationTexts.invalidDate)
         }
 
         return try {
@@ -85,7 +85,7 @@ class SimulationInputValidator {
             YearMonth.of(year, month)
             ValidationResult(true)
         } catch (e: Exception) {
-            ValidationResult(false, "Data inválida (use MM/AAAA)")
+            ValidationResult(false, SimulationTexts.invalidDate)
         }
     }
 
