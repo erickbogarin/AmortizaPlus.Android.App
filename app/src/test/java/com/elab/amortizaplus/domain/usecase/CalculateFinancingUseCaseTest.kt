@@ -8,13 +8,21 @@ import com.elab.amortizaplus.domain.model.Simulation
 import kotlin.math.pow
 import org.junit.Assert.*
 import org.junit.Test
+import com.elab.amortizaplus.domain.calculator.FinancingCalculator
+import com.elab.amortizaplus.domain.calculator.PriceCalculator
+import com.elab.amortizaplus.domain.calculator.SacCalculator
 
 /**
  * Testes para o caso de uso principal de cálculo de financiamento.
  */
 class CalculateFinancingUseCaseTest {
 
-    private val useCase = CalculateFinancingUseCase()
+    private val useCase = CalculateFinancingUseCase(
+        financingCalculator = FinancingCalculator(
+            sacCalculator = SacCalculator(),
+            priceCalculator = PriceCalculator()
+        )
+    )
 
     @Test
     fun `deve gerar resultado completo com cenarios comparativos`() {

@@ -10,7 +10,10 @@ import org.junit.Test
 
 class FinancingCalculatorTest {
 
-    private val calculator = FinancingCalculator()
+    private val calculator = FinancingCalculator(
+        sacCalculator = SacCalculator(),
+        priceCalculator = PriceCalculator()
+    )
 
     @Test
     fun `compare deve retornar economia e reducao de prazo`() {

@@ -12,7 +12,10 @@ class FinancingSystemComparisonTest {
 
     @Test
     fun `PRICE deve gerar juros totais maiores que SAC no mesmo cenario`() {
-        val calc = FinancingCalculator()
+        val calc = FinancingCalculator(
+            sacCalculator = SacCalculator(),
+            priceCalculator = PriceCalculator()
+        )
         val rate = InterestRate.Annual(0.11)
         val loanAmount = 200_000.0
         val terms = 240
