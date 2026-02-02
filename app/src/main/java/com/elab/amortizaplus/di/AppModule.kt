@@ -1,9 +1,15 @@
 package com.elab.amortizaplus.di
 
+import com.elab.amortizaplus.data.local.SimulationHistoryDataStore
+import com.elab.amortizaplus.data.repository.SimulationHistoryRepositoryImpl
 import com.elab.amortizaplus.domain.calculator.FinancingCalculator
 import com.elab.amortizaplus.domain.calculator.PriceCalculator
 import com.elab.amortizaplus.domain.calculator.SacCalculator
 import com.elab.amortizaplus.domain.usecase.CalculateFinancingUseCase
+import com.elab.amortizaplus.domain.usecase.GetSimulationByIdUseCase
+import com.elab.amortizaplus.domain.usecase.GetSimulationHistoryUseCase
+import com.elab.amortizaplus.domain.usecase.SaveSimulationUseCase
+import com.elab.amortizaplus.domain.repository.SimulationHistoryRepository
 import com.elab.amortizaplus.presentation.screens.simulation.SimulationViewModel
 import com.elab.amortizaplus.presentation.screens.simulation.validation.SimulationInputValidator
 
@@ -24,6 +30,23 @@ val domainModule = module {
 
     // Novo a cada uso
     factory { CalculateFinancingUseCase(get()) }
+}
+
+// -------------------------------------------------------------------------
+// Data
+// -------------------------------------------------------------------------
+val dataModule = module {
+    single { SimulationHistoryDataStore(get()) }
+    single<SimulationHistoryRepository> { SimulationHistoryRepositoryImpl(get()) }
+}
+
+// -------------------------------------------------------------------------
+// Use Cases
+// -------------------------------------------------------------------------
+val useCaseModule = module {
+    factory { SaveSimulationUseCase(get()) }
+    factory { GetSimulationHistoryUseCase(get()) }
+    factory { GetSimulationByIdUseCase(get()) }
 }
 
 // -------------------------------------------------------------------------
@@ -51,6 +74,8 @@ val viewModelModule = module {
 val appModule = module {
     includes(
         domainModule,
+        dataModule,
+        useCaseModule,
         validationModule,
         viewModelModule
     )

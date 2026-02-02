@@ -44,8 +44,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.navigation.compose)
     implementation(libs.koin.compose)
-    // futuramente:
-    // implementation(libs.datastore.preferences)
+    implementation(libs.datastore.preferences)
     testImplementation(libs.junit)
     debugImplementation(libs.compose.ui.tooling)
 }
