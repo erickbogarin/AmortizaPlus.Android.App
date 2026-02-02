@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "gradleTask",
+      "type": "pickString",
+      "description": "Select the Gradle task to run",
+      "options": [
+        "assembleDebug",
+        "installDebug",
+        "clean",
+        "test",
+        "lint",
+        "dependencies",
+        ":app:dependencies"
+      ],
+      "default": "assembleDebug"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "Gradle: run (pick)",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["${input:gradleTask}"],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "detail": "Run a Gradle task selected at launch time",
+      "problemMatcher": []
+    }
+  ]
+}

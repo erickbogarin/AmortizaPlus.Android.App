@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Gradle Task (pick)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "bash",
+      "program": "${workspaceFolder}/.vscode/placeholder.sh",
+      "preLaunchTask": "Gradle: run (pick)",
+      "noDebug": true,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}
