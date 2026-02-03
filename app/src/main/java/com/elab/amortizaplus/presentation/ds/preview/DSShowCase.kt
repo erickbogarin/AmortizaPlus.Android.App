@@ -17,9 +17,6 @@ import androidx.compose.ui.unit.dp
 import com.elab.amortizaplus.presentation.designsystem.theme.AmortizaPlusTheme
 import com.elab.amortizaplus.presentation.designsystem.theme.LocalAppColors
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
-import com.elab.amortizaplus.presentation.designsystem.theme.success
-import com.elab.amortizaplus.presentation.designsystem.theme.warning
-import com.elab.amortizaplus.presentation.designsystem.theme.info
 
 /**
  * Preview completo do AmortizaPlusTheme.
@@ -247,11 +244,11 @@ private fun SemanticColorsSection() {
     SectionTitle("Semantic Colors (Extended)")
 
     Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)) {
-        // Success
+        // Gains / Economy (Tertiary)
         Card(
             colors = CardDefaults.cardColors(
-                containerColor = LocalAppColors.current.successContainer,
-                contentColor = LocalAppColors.current.onSuccessContainer
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -263,16 +260,16 @@ private fun SemanticColorsSection() {
                 Icon(
                     Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.success
+                    tint = MaterialTheme.colorScheme.tertiary
                 )
                 Column {
                     Text(
-                        "Success Color",
+                        "Economia/Ganhos",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "Usado para validação, economia, ganhos",
+                        "Usado para economia/ganhos do domínio",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -311,37 +308,6 @@ private fun SemanticColorsSection() {
             }
         }
 
-        // Info
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = LocalAppColors.current.infoContainer,
-                contentColor = LocalAppColors.current.onInfoContainer
-            ),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
-                modifier = Modifier.padding(AppSpacing.medium),
-                horizontalArrangement = Arrangement.spacedBy(AppSpacing.small),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Default.Info,
-                    contentDescription = null,
-                    tint = LocalAppColors.current.info
-                )
-                Column {
-                    Text(
-                        "Info Color",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        "Usado para dicas e informações contextuais",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
     }
 }
 

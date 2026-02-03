@@ -15,7 +15,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 
 import com.elab.amortizaplus.presentation.ds.components.textfield.TextFieldVariant
 import com.elab.amortizaplus.presentation.ds.components.textfield.toConfig
-import com.elab.amortizaplus.presentation.ds.foundation.AppColors
 import com.elab.amortizaplus.presentation.ds.foundation.AppDimens
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 
@@ -175,7 +174,7 @@ private fun TrailingIcon(
             tint = if (isError) {
                 MaterialTheme.colorScheme.error
             } else {
-                AppColors.Success
+                MaterialTheme.colorScheme.tertiary
             },
             modifier = Modifier.size(AppDimens.iconSizeMedium)
         )

@@ -15,6 +15,7 @@ import com.elab.amortizaplus.presentation.ds.components.AppOptionChip
 import com.elab.amortizaplus.presentation.ds.components.AppOutlinedTextField
 import com.elab.amortizaplus.presentation.ds.components.ButtonVariant
 import com.elab.amortizaplus.presentation.ds.components.textfield.TextFieldVariant
+import com.elab.amortizaplus.presentation.ds.foundation.AppDimens
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.ExtraAmortizationFormItem
 import com.elab.amortizaplus.presentation.screens.simulation.SimulationFormActions
@@ -37,114 +38,122 @@ fun SimulationFormSection(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
     ) {
-        Text(
-            text = SimulationTexts.formSectionTitle,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        // Valor do empréstimo
-        AppOutlinedTextField(
-            value = formState.loanAmount,
-            onValueChange = actions.onLoanAmountChange,
-            label = SimulationTexts.loanAmountLabel,
-            placeholder = SimulationTexts.loanAmountPlaceholder,
-            variant = TextFieldVariant.Money,
-            supportingText = formState.loanAmountError,
-            isError = formState.loanAmountError != null,
-            showSuccessIcon = formState.loanAmountError == null && formState.loanAmount.isNotBlank()
-        )
-
-        Spacer(Modifier.height(AppSpacing.small))
-
-        // Taxa de juros
-        AppOutlinedTextField(
-            value = formState.interestRate,
-            onValueChange = actions.onInterestRateChange,
-            label = SimulationTexts.interestRateLabel,
-            placeholder = SimulationTexts.interestRatePlaceholder,
-            variant = TextFieldVariant.Percentage,
-            supportingText = formState.interestRateError,
-            isError = formState.interestRateError != null,
-            showSuccessIcon = formState.interestRateError == null && formState.interestRate.isNotBlank()
-        )
-
-        Spacer(Modifier.height(AppSpacing.small))
-
-        // Tipo de taxa (Anual / Mensal)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = AppDimens.elevationSmall,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            AppOptionChip(
-                selected = formState.rateType == InterestRateType.ANNUAL,
-                text = SimulationTexts.rateTypeAnnual,
-                onClick = { actions.onRateTypeChange(InterestRateType.ANNUAL) },
-                modifier = Modifier.weight(1f)
-            )
-            AppOptionChip(
-                selected = formState.rateType == InterestRateType.MONTHLY,
-                text = SimulationTexts.rateTypeMonthly,
-                onClick = { actions.onRateTypeChange(InterestRateType.MONTHLY) },
-                modifier = Modifier.weight(1f)
-            )
+            Column(
+                modifier = Modifier.padding(AppSpacing.medium),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
+            ) {
+                Text(
+                    text = SimulationTexts.formSectionTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                // Valor do empréstimo
+                AppOutlinedTextField(
+                    value = formState.loanAmount,
+                    onValueChange = actions.onLoanAmountChange,
+                    label = SimulationTexts.loanAmountLabel,
+                    placeholder = SimulationTexts.loanAmountPlaceholder,
+                    variant = TextFieldVariant.Money,
+                    supportingText = formState.loanAmountError,
+                    isError = formState.loanAmountError != null,
+                    showSuccessIcon = formState.loanAmountError == null && formState.loanAmount.isNotBlank()
+                )
+
+                Spacer(Modifier.height(AppSpacing.small))
+
+                // Taxa de juros
+                AppOutlinedTextField(
+                    value = formState.interestRate,
+                    onValueChange = actions.onInterestRateChange,
+                    label = SimulationTexts.interestRateLabel,
+                    placeholder = SimulationTexts.interestRatePlaceholder,
+                    variant = TextFieldVariant.Percentage,
+                    supportingText = formState.interestRateError,
+                    isError = formState.interestRateError != null,
+                    showSuccessIcon = formState.interestRateError == null && formState.interestRate.isNotBlank()
+                )
+
+                Spacer(Modifier.height(AppSpacing.small))
+
+                // Tipo de taxa (Anual / Mensal)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
+                ) {
+                    AppOptionChip(
+                        selected = formState.rateType == InterestRateType.ANNUAL,
+                        text = SimulationTexts.rateTypeAnnual,
+                        onClick = { actions.onRateTypeChange(InterestRateType.ANNUAL) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    AppOptionChip(
+                        selected = formState.rateType == InterestRateType.MONTHLY,
+                        text = SimulationTexts.rateTypeMonthly,
+                        onClick = { actions.onRateTypeChange(InterestRateType.MONTHLY) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(Modifier.height(AppSpacing.small))
+
+                // Prazo (meses)
+                AppOutlinedTextField(
+                    value = formState.terms,
+                    onValueChange = actions.onTermsChange,
+                    label = SimulationTexts.termsLabel,
+                    placeholder = SimulationTexts.termsPlaceholder,
+                    variant = TextFieldVariant.Number,
+                    supportingText = formState.termsError,
+                    isError = formState.termsError != null,
+                    showSuccessIcon = formState.termsError == null && formState.terms.isNotBlank()
+                )
+
+                Spacer(Modifier.height(AppSpacing.small))
+
+                // Data de início
+                AppOutlinedTextField(
+                    value = formState.startDate,
+                    onValueChange = actions.onStartDateChange,
+                    label = SimulationTexts.startDateLabel,
+                    placeholder = SimulationTexts.startDatePlaceholder,
+                    variant = TextFieldVariant.MonthYear,
+                    supportingText = formState.startDateError,
+                    isError = formState.startDateError != null,
+                    showSuccessIcon = formState.startDateError == null && formState.startDate.isNotBlank()
+                )
+
+                Spacer(Modifier.height(AppSpacing.small))
+
+                // Sistema de amortização (SAC / PRICE)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
+                ) {
+                    AppOptionChip(
+                        selected = formState.system == AmortizationSystem.SAC,
+                        text = SimulationTexts.systemSac,
+                        onClick = { actions.onSystemChange(AmortizationSystem.SAC) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    AppOptionChip(
+                        selected = formState.system == AmortizationSystem.PRICE,
+                        text = SimulationTexts.systemPrice,
+                        onClick = { actions.onSystemChange(AmortizationSystem.PRICE) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
 
-        Spacer(Modifier.height(AppSpacing.small))
-
-        // Prazo (meses)
-        AppOutlinedTextField(
-            value = formState.terms,
-            onValueChange = actions.onTermsChange,
-            label = SimulationTexts.termsLabel,
-            placeholder = SimulationTexts.termsPlaceholder,
-            
-            variant = TextFieldVariant.Number,
-            supportingText = formState.termsError,
-            isError = formState.termsError != null,
-            showSuccessIcon = formState.termsError == null && formState.terms.isNotBlank()
-        )
-
-        Spacer(Modifier.height(AppSpacing.small))
-
-        // Data de início
-        AppOutlinedTextField(
-            value = formState.startDate,
-            onValueChange = actions.onStartDateChange,
-            label = SimulationTexts.startDateLabel,
-            placeholder = SimulationTexts.startDatePlaceholder,
-            variant = TextFieldVariant.MonthYear,
-            supportingText = formState.startDateError,
-            isError = formState.startDateError != null,
-            showSuccessIcon = formState.startDateError == null && formState.startDate.isNotBlank()
-        )
-
-        Spacer(Modifier.height(AppSpacing.small))
-
-        // Sistema de amortização (SAC / PRICE)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
-        ) {
-            AppOptionChip(
-                selected = formState.system == AmortizationSystem.SAC,
-                text = SimulationTexts.systemSac,
-                onClick = { actions.onSystemChange(AmortizationSystem.SAC) },
-                modifier = Modifier.weight(1f)
-            )
-            AppOptionChip(
-                selected = formState.system == AmortizationSystem.PRICE,
-                text = SimulationTexts.systemPrice,
-                onClick = { actions.onSystemChange(AmortizationSystem.PRICE) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(Modifier.height(AppSpacing.medium))
         Divider(color = MaterialTheme.colorScheme.outlineVariant)
-        Spacer(Modifier.height(AppSpacing.medium))
 
         ExtraAmortizationsSection(
             items = formState.extraAmortizations,
@@ -155,9 +164,7 @@ fun SimulationFormSection(
             onStrategyChange = actions.onExtraStrategyChange
         )
 
-        Spacer(Modifier.height(AppSpacing.medium))
         Divider(color = MaterialTheme.colorScheme.outlineVariant)
-        Spacer(Modifier.height(AppSpacing.medium))
 
         // Botão calcular
         AppButton(

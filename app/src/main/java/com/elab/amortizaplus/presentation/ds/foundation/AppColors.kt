@@ -16,43 +16,17 @@ object AppColors {
     // =========================================================================
 
     /**
-     * Verde de sucesso (validação, confirmação).
-     *
-     * Uso:
-     * - Ícone de campo válido
-     * - Mensagem de sucesso
-     * - Economia/ganhos
-     */
-    val Success = Color(0xFF2E7D32)
-    val SuccessContainer = Color(0xFFA5D6A7)
-    val OnSuccess = Color(0xFFFFFFFF)
-    val OnSuccessContainer = Color(0xFF1B5E20)
-
-    /**
-     * Amarelo de aviso (atenção, cuidado).
+     * Âmbar de atenção (aviso não crítico).
      *
      * Uso:
      * - Alertas não críticos
      * - Avisos informativos
      * - Estados intermediários
      */
-    val Warning = Color(0xFFF57C00)
-    val WarningContainer = Color(0xFFFFE0B2)
-    val OnWarning = Color(0xFFFFFFFF)
-    val OnWarningContainer = Color(0xFFE65100)
-
-    /**
-     * Azul de informação (dicas, contexto).
-     *
-     * Uso:
-     * - Tooltips
-     * - Mensagens informativas
-     * - Ajuda contextual
-     */
-    val Info = Color(0xFF1976D2)
-    val InfoContainer = Color(0xFFBBDEFB)
-    val OnInfo = Color(0xFFFFFFFF)
-    val OnInfoContainer = Color(0xFF0D47A1)
+    val Warning = Color(0xFFFFB300)
+    val WarningContainer = Color(0xFFFFE082)
+    val OnWarning = Color(0xFF2B1F00)
+    val OnWarningContainer = Color(0xFF3A2B00)
 
     // =========================================================================
     // LIGHT MODE (Material 3 base)
@@ -68,6 +42,7 @@ object AppColors {
     val SecondaryContainer = Color(0xFFD7E3F8)
     val OnSecondaryContainer = Color(0xFF101C2B)
 
+    // Tertiary = economia/ganhos (semântica do domínio)
     val Tertiary = Color(0xFF2E7D32)
     val OnTertiary = Color(0xFFFFFFFF)
     val TertiaryContainer = Color(0xFFA5D6A7)
@@ -121,4 +96,13 @@ object AppColors {
 
     val OutlineDark = Color(0xFF8D9199)
     val OutlineVariantDark = Color(0xFF44474E)
+
+    // =========================================================================
+    // SEMÂNTICAS (Dark)
+    // =========================================================================
+
+    val WarningDark = Color(0xFFFFD54F)
+    val WarningContainerDark = Color(0xFF5C3B00)
+    val OnWarningDark = Color(0xFF2A1C00)
+    val OnWarningContainerDark = Color(0xFFFFE082)
 }

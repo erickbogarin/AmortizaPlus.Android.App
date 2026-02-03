@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -28,7 +29,7 @@ import androidx.compose.ui.unit.sp
  * ```kotlin
  * AmortizaPlusTheme {
  *     // Seu conteúdo aqui
- *     val successColor = LocalAppColors.current.success
+ *     val warningColor = LocalAppColors.current.warning
  * }
  * ```
  */
@@ -133,56 +134,41 @@ private val DarkColorScheme = darkColorScheme(
  * Acessíveis via LocalAppColors.current dentro de um AmortizaPlusTheme.
  */
 data class AppExtendedColors(
-    val success: androidx.compose.ui.graphics.Color,
-    val onSuccess: androidx.compose.ui.graphics.Color,
-    val successContainer: androidx.compose.ui.graphics.Color,
-    val onSuccessContainer: androidx.compose.ui.graphics.Color,
-
     val warning: androidx.compose.ui.graphics.Color,
     val onWarning: androidx.compose.ui.graphics.Color,
     val warningContainer: androidx.compose.ui.graphics.Color,
-    val onWarningContainer: androidx.compose.ui.graphics.Color,
-
-    val info: androidx.compose.ui.graphics.Color,
-    val onInfo: androidx.compose.ui.graphics.Color,
-    val infoContainer: androidx.compose.ui.graphics.Color,
-    val onInfoContainer: androidx.compose.ui.graphics.Color
+    val onWarningContainer: androidx.compose.ui.graphics.Color
 )
 
 /**
  * Cores estendidas para modo claro.
  */
 private val LightExtendedColors = AppExtendedColors(
-    success = AppColors.Success,
-    onSuccess = AppColors.OnSuccess,
-    successContainer = AppColors.SuccessContainer,
-    onSuccessContainer = AppColors.OnSuccessContainer,
-
     warning = AppColors.Warning,
     onWarning = AppColors.OnWarning,
     warningContainer = AppColors.WarningContainer,
-    onWarningContainer = AppColors.OnWarningContainer,
-
-    info = AppColors.Info,
-    onInfo = AppColors.OnInfo,
-    infoContainer = AppColors.InfoContainer,
-    onInfoContainer = AppColors.OnInfoContainer
+    onWarningContainer = AppColors.OnWarningContainer
 )
 
 /**
  * Cores estendidas para modo escuro.
  *
- * Mesmas cores, mas podem ser ajustadas no futuro se necessário.
+ * Mantém contraste adequado para modo escuro.
  */
-private val DarkExtendedColors = LightExtendedColors
+private val DarkExtendedColors = AppExtendedColors(
+    warning = AppColors.WarningDark,
+    onWarning = AppColors.OnWarningDark,
+    warningContainer = AppColors.WarningContainerDark,
+    onWarningContainer = AppColors.OnWarningContainerDark
+)
 
 /**
  * CompositionLocal para acessar cores estendidas.
  *
  * Uso:
  * ```kotlin
- * val successColor = LocalAppColors.current.success
- * Icon(tint = LocalAppColors.current.success)
+ * val warningColor = LocalAppColors.current.warning
+ * Icon(tint = LocalAppColors.current.warning)
  * ```
  */
 val LocalAppColors = staticCompositionLocalOf { LightExtendedColors }
@@ -196,7 +182,7 @@ val LocalAppColors = staticCompositionLocalOf { LightExtendedColors }
  *
  * Características:
  * - Suporte automático a modo claro/escuro
- * - Cores estendidas para Success, Warning, Info
+ * - Cores estendidas para Warning
  * - Tipografia personalizada
  * - Status bar colorida (Android)
  *
@@ -222,8 +208,7 @@ fun AmortizaPlusTheme(
         SideEffect {
             val window = (view.context as? Activity)?.window
             window?.let {
-                it.statusBarColor = colorScheme.primary.toArgb()
-
+                it.statusBarColor = colorScheme.surface.toArgb()
                 WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = !darkTheme
             }
         }
@@ -403,27 +388,22 @@ private val AppTypography = androidx.compose.material3.Typography(
  *
  * Uso:
  * ```kotlin
- * MaterialTheme.colorScheme.success // via extension
- * LocalAppColors.current.success    // via CompositionLocal
+ * MaterialTheme.colorScheme.warning // via extension
+ * LocalAppColors.current.warning    // via CompositionLocal
  * ```
  */
-val androidx.compose.material3.ColorScheme.success: androidx.compose.ui.graphics.Color
-    @Composable
-    get() = LocalAppColors.current.success
-
-val androidx.compose.material3.ColorScheme.onSuccess: androidx.compose.ui.graphics.Color
-    @Composable
-    get() = LocalAppColors.current.onSuccess
-
-val androidx.compose.material3.ColorScheme.successContainer: androidx.compose.ui.graphics.Color
-    @Composable
-    get() = LocalAppColors.current.successContainer
-
 val androidx.compose.material3.ColorScheme.warning: androidx.compose.ui.graphics.Color
     @Composable
     get() = LocalAppColors.current.warning
-
-val androidx.compose.material3.ColorScheme.info: androidx.compose.ui.graphics.Color
+val androidx.compose.material3.ColorScheme.onWarning: androidx.compose.ui.graphics.Color
     @Composable
-    get() = LocalAppColors.current.info
+    get() = LocalAppColors.current.onWarning
+
+val androidx.compose.material3.ColorScheme.warningContainer: androidx.compose.ui.graphics.Color
+    @Composable
+    get() = LocalAppColors.current.warningContainer
+
+val androidx.compose.material3.ColorScheme.onWarningContainer: androidx.compose.ui.graphics.Color
+    @Composable
+    get() = LocalAppColors.current.onWarningContainer
 

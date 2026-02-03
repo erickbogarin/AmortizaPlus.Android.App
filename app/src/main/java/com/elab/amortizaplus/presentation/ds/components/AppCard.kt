@@ -73,7 +73,7 @@ fun AppSummaryCard(
 /**
  *
  * Card para exibir informações de economia/ganhos.
- * Aplica cor terciária para destacar benefícios obtidos.
+ * Aplica cor terciária para destacar benefícios obtidos (semântica do domínio).
  *
  * @param modifier Modificador Compose
  * @param content Conteúdo do card

@@ -42,7 +42,6 @@ import com.elab.amortizaplus.presentation.ds.components.AppCard
 import com.elab.amortizaplus.presentation.ds.components.AppFinancialInfoRow
 import com.elab.amortizaplus.presentation.ds.components.AppTopBar
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
-import com.elab.amortizaplus.presentation.designsystem.theme.success
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 import com.elab.amortizaplus.presentation.util.formatTerms
 import com.elab.amortizaplus.presentation.util.toCurrencyBR
@@ -350,7 +349,7 @@ private fun TableDataRow(
         columns.forEach { column ->
             val isExtraColumn = column == TableColumn.ExtraAmortization
             val cellColor = if (hasExtra && isExtraColumn) {
-                MaterialTheme.colorScheme.success
+                MaterialTheme.colorScheme.tertiary
             } else {
                 rowTextColor
             }

@@ -1,6 +1,7 @@
 package com.elab.amortizaplus.presentation.ds.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,6 +21,7 @@ fun AppTopBar(
 ) {
     Column {
         TopAppBar(
+            modifier = androidx.compose.ui.Modifier.statusBarsPadding(),
             title = { Text(title) },
             navigationIcon = { navigationIcon?.invoke() },
             actions = actions,

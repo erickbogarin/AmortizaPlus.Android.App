@@ -18,7 +18,6 @@ import com.elab.amortizaplus.presentation.ds.components.AppButton
 import com.elab.amortizaplus.presentation.ds.components.AppFinancialInfoRow
 import com.elab.amortizaplus.presentation.ds.components.AppCard
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
-import com.elab.amortizaplus.presentation.designsystem.theme.success
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 import com.elab.amortizaplus.presentation.util.formatTerms
 import com.elab.amortizaplus.presentation.util.toCurrencyBR
@@ -129,7 +128,7 @@ private fun ResultHeader(value: String) {
             text = value,
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.success
+            color = MaterialTheme.colorScheme.tertiary
         )
     }
 }
