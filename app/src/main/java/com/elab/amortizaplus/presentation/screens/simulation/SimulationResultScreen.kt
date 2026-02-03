@@ -29,7 +29,7 @@ fun SimulationResultScreen(
             .padding(contentPadding)
             .verticalScroll(rememberScrollState())
             .padding(AppSpacing.medium),
-        verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.large)
     ) {
         SimulationResultSection(
             summaryWithout = summaryWithout,
