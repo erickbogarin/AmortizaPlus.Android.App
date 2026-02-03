@@ -1,8 +1,5 @@
 package com.elab.amortizaplus.presentation.screens.simulation.sections
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,7 +12,6 @@ import com.elab.amortizaplus.presentation.ds.components.AppButton
 import com.elab.amortizaplus.presentation.ds.components.AppCard
 import com.elab.amortizaplus.presentation.ds.components.AppInfoCard
 import com.elab.amortizaplus.presentation.ds.components.AppLoadingIndicator
-import com.elab.amortizaplus.presentation.ds.components.ButtonVariant
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 
@@ -51,7 +47,6 @@ fun SimulationLoadingSection(
 fun SimulationErrorSection(
     message: String,
     onRetry: () -> Unit,
-    onReset: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     AppCard(
@@ -70,21 +65,10 @@ fun SimulationErrorSection(
             style = MaterialTheme.typography.bodyMedium
         )
         Spacer(Modifier.height(AppSpacing.medium))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
-        ) {
-            AppButton(
-                text = SimulationTexts.retryButton,
-                onClick = onRetry,
-                modifier = Modifier.weight(1f)
-            )
-            AppButton(
-                text = SimulationTexts.newSimulationButton,
-                onClick = onReset,
-                variant = ButtonVariant.Secondary,
-                modifier = Modifier.weight(1f)
-            )
-        }
+        AppButton(
+            text = SimulationTexts.retryButton,
+            onClick = onRetry,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

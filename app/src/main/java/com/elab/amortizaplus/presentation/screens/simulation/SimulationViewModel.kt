@@ -26,7 +26,7 @@ class SimulationViewModel(
 
     val formState: StateFlow<SimulationFormState> = _formState.asStateFlow()
 
-    private val _uiState = MutableStateFlow<SimulationUiState>(SimulationUiState.Initial)
+    private val _uiState = MutableStateFlow<SimulationUiState>(SimulationUiState.Form())
 
     val uiState: StateFlow<SimulationUiState> = _uiState.asStateFlow()
 
@@ -111,20 +111,36 @@ class SimulationViewModel(
     // Execução da simulação
     // -------------------------------------------------------------------------
 
-    fun calculate() {
+    fun onCalculateClicked() {
+        calculate()
+    }
+
+    fun onEditSimulation() {
+        _uiState.value = SimulationUiState.Form()
+    }
+
+    fun onNewSimulation() {
+        reset()
+    }
+
+    private fun calculate() {
         if (!_formState.value.isValid()) {
-            _uiState.value = SimulationUiState.Error(SimulationTexts.formInvalidMessage)
+            _uiState.value = SimulationUiState.Form(
+                status = SimulationFormStatus.Error(SimulationTexts.formInvalidMessage)
+            )
             return
         }
 
         val inputData = _formState.value.toInputData()
         if (inputData == null) {
-            _uiState.value = SimulationUiState.Error(SimulationTexts.inputProcessingError)
+            _uiState.value = SimulationUiState.Form(
+                status = SimulationFormStatus.Error(SimulationTexts.inputProcessingError)
+            )
             return
         }
 
         viewModelScope.launch {
-            _uiState.value = SimulationUiState.Loading
+            _uiState.value = SimulationUiState.Form(status = SimulationFormStatus.Loading)
             try {
                 delay(400)
                 val simulation = Simulation(
@@ -139,7 +155,7 @@ class SimulationViewModel(
                 )
 
                 val result = calculateFinancingUseCase(simulation)
-                _uiState.value = SimulationUiState.Success(
+                _uiState.value = SimulationUiState.Result(
                     inputData = inputData,
                     summaryWithout = result.summaryWithoutExtra,
                     summaryWith = result.summaryWithExtra,
@@ -153,8 +169,10 @@ class SimulationViewModel(
                     result = result
                 )
             } catch (e: Exception) {
-                _uiState.value = SimulationUiState.Error(
-                    "${SimulationTexts.calculationErrorPrefix} ${e.message}"
+                _uiState.value = SimulationUiState.Form(
+                    status = SimulationFormStatus.Error(
+                        "${SimulationTexts.calculationErrorPrefix} ${e.message}"
+                    )
                 )
             }
         }
@@ -164,13 +182,15 @@ class SimulationViewModel(
         if (id.isBlank()) return
 
         viewModelScope.launch {
-            _uiState.value = SimulationUiState.Loading
+            _uiState.value = SimulationUiState.Form(status = SimulationFormStatus.Loading)
             val loadResult = getSimulationByIdUseCase(id)
 
             loadResult.fold(
                 onSuccess = { saved ->
                     if (saved == null) {
-                        _uiState.value = SimulationUiState.Error(SimulationTexts.historyNotFound)
+                        _uiState.value = SimulationUiState.Form(
+                            status = SimulationFormStatus.Error(SimulationTexts.historyNotFound)
+                        )
                         return@fold
                     }
 
@@ -178,7 +198,7 @@ class SimulationViewModel(
 
                     try {
                         val calculated = calculateFinancingUseCase(saved.simulation)
-                        _uiState.value = SimulationUiState.Success(
+                        _uiState.value = SimulationUiState.Result(
                             inputData = saved.simulation.toInputData(),
                             summaryWithout = calculated.summaryWithoutExtra,
                             summaryWith = calculated.summaryWithExtra,
@@ -186,13 +206,17 @@ class SimulationViewModel(
                             installmentsWith = calculated.paymentsWithExtra
                         )
                     } catch (e: Exception) {
-                        _uiState.value = SimulationUiState.Error(
-                            "${SimulationTexts.calculationErrorPrefix} ${e.message}"
+                        _uiState.value = SimulationUiState.Form(
+                            status = SimulationFormStatus.Error(
+                                "${SimulationTexts.calculationErrorPrefix} ${e.message}"
+                            )
                         )
                     }
                 },
                 onFailure = {
-                    _uiState.value = SimulationUiState.Error(SimulationTexts.historyLoadError)
+                    _uiState.value = SimulationUiState.Form(
+                        status = SimulationFormStatus.Error(SimulationTexts.historyLoadError)
+                    )
                 }
             )
         }
@@ -200,7 +224,7 @@ class SimulationViewModel(
 
     fun reset() {
         _formState.value = SimulationFormState()
-        _uiState.value = SimulationUiState.Initial
+        _uiState.value = SimulationUiState.Form()
     }
 
     private fun updateExtraItem(

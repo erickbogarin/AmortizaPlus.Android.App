@@ -33,7 +33,7 @@ data class SimulationFormActions(
             onExtraMonthChange = viewModel::onExtraMonthChange,
             onExtraAmountChange = viewModel::onExtraAmountChange,
             onExtraStrategyChange = viewModel::onExtraStrategyChange,
-            onCalculate = viewModel::calculate
+            onCalculate = viewModel::onCalculateClicked
         )
     }
 }

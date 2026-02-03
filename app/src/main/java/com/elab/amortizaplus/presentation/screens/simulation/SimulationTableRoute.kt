@@ -23,7 +23,7 @@ fun SimulationTableRoute(
     viewModel: SimulationViewModel = koinViewModel(viewModelStoreOwner = parentEntry)
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val state = uiState as? SimulationUiState.Success
+    val state = uiState as? SimulationUiState.Result
 
     if (state == null) {
         AppInfoCard {
