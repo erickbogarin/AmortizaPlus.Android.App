@@ -305,7 +305,8 @@ private fun TableHeaderRow(columns: List<TableColumn>) {
             width = 80.dp,
             bold = true,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textStyle = MaterialTheme.typography.labelLarge
+            textStyle = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Medium
         )
         columns.forEach { column ->
             TableCell(
@@ -313,7 +314,8 @@ private fun TableHeaderRow(columns: List<TableColumn>) {
                 width = column.width,
                 bold = true,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textStyle = MaterialTheme.typography.labelLarge
+                textStyle = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Medium
             )
         }
     }
@@ -335,14 +337,15 @@ private fun TableDataRow(
         modifier = Modifier
             .fillMaxWidth()
             .background(rowBackground)
-            .padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
+            .padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmallTight),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
     ) {
         TableCell(
             text = item.month.toString(),
             width = 80.dp,
-            bold = hasExtra,
-            color = rowTextColor
+            color = rowTextColor,
+            textStyle = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Medium
         )
         columns.forEach { column ->
             val isExtraColumn = column == TableColumn.ExtraAmortization
@@ -355,8 +358,9 @@ private fun TableDataRow(
             TableCell(
                 text = column.valueFor(item),
                 width = column.width,
-                bold = isBold,
-                color = cellColor
+                color = cellColor,
+                textStyle = MaterialTheme.typography.bodySmall,
+                fontWeight = if (isBold) FontWeight.Medium else FontWeight.Normal
             )
         }
     }
@@ -380,7 +384,8 @@ private fun TableFooterRow(
             width = 80.dp,
             bold = true,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textStyle = MaterialTheme.typography.labelLarge
+            textStyle = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Medium
         )
         columns.forEach { column ->
             TableCell(
@@ -388,7 +393,8 @@ private fun TableFooterRow(
                 width = column.width,
                 bold = true,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textStyle = MaterialTheme.typography.labelLarge
+                textStyle = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Medium
             )
         }
     }
@@ -400,12 +406,13 @@ private fun TableCell(
     width: Dp,
     bold: Boolean = false,
     color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
-    textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodySmall
+    textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodySmall,
+    fontWeight: FontWeight? = null
 ) {
     Text(
         text = text,
         style = textStyle,
-        fontWeight = if (bold) FontWeight.SemiBold else FontWeight.Normal,
+        fontWeight = fontWeight ?: if (bold) FontWeight.SemiBold else FontWeight.Normal,
         color = color,
         modifier = Modifier.width(width)
     )
