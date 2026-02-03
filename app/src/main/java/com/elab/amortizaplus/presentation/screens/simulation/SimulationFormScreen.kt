@@ -8,16 +8,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.elab.amortizaplus.presentation.ds.components.AppTopBar
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationErrorSection
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationFormSection
@@ -25,7 +21,6 @@ import com.elab.amortizaplus.presentation.screens.simulation.sections.Simulation
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationLoadingSection
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SimulationFormScreen(
     formState: SimulationFormState,
@@ -38,8 +33,8 @@ fun SimulationFormScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = { Text(SimulationTexts.screenTitle) },
+            AppTopBar(
+                title = SimulationTexts.screenTitle,
                 actions = {
                     IconButton(onClick = onViewHistory) {
                         Icon(
@@ -47,11 +42,7 @@ fun SimulationFormScreen(
                             contentDescription = SimulationTexts.historyTitle
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                }
             )
         }
     ) { padding ->

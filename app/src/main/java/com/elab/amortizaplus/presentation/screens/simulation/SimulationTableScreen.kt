@@ -24,8 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +40,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import com.elab.amortizaplus.domain.model.Installment
 import com.elab.amortizaplus.presentation.ds.components.AppCard
 import com.elab.amortizaplus.presentation.ds.components.AppFinancialInfoRow
+import com.elab.amortizaplus.presentation.ds.components.AppTopBar
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.designsystem.theme.success
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
@@ -74,8 +73,8 @@ fun SimulationTableScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = { Text(SimulationTexts.tableTitle) },
+            AppTopBar(
+                title = SimulationTexts.tableTitle,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -83,11 +82,7 @@ fun SimulationTableScreen(
                             contentDescription = SimulationTexts.tableBackButton
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                }
             )
         }
     ) { padding ->

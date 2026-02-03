@@ -9,16 +9,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,11 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.elab.amortizaplus.domain.model.SimulationSummary
+import com.elab.amortizaplus.presentation.ds.components.AppTopBar
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.sections.SimulationResultSection
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SimulationResultScreen(
     summaryWithout: SimulationSummary,
@@ -44,8 +40,8 @@ fun SimulationResultScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = { Text(SimulationTexts.resultScreenTitle) },
+            AppTopBar(
+                title = SimulationTexts.resultScreenTitle,
                 navigationIcon = {
                     IconButton(onClick = onEditSimulation) {
                         Icon(
@@ -73,11 +69,7 @@ fun SimulationResultScreen(
                             }
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                }
             )
         }
     ) { padding ->

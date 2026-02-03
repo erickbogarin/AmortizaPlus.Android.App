@@ -29,4 +29,7 @@ object AppDimens {
     val textSizeMedium = 14.sp
     val textSizeLarge = 16.sp
     val textSizeTitle = 20.sp
+
+    // Dividers
+    val dividerThickness = 1.dp
 }

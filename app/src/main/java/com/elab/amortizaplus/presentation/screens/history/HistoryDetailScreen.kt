@@ -6,13 +6,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,6 +22,7 @@ import com.elab.amortizaplus.presentation.ds.components.AppCard
 import com.elab.amortizaplus.presentation.ds.components.AppFinancialInfoRow
 import com.elab.amortizaplus.presentation.ds.components.AppInfoCard
 import com.elab.amortizaplus.presentation.ds.components.AppLoadingIndicator
+import com.elab.amortizaplus.presentation.ds.components.AppTopBar
 import com.elab.amortizaplus.presentation.ds.components.ButtonVariant
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
@@ -32,7 +31,6 @@ import com.elab.amortizaplus.presentation.util.toCurrencyBR
 import com.elab.amortizaplus.presentation.util.toPercent
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryDetailScreen(
     simulationId: String,
@@ -48,8 +46,8 @@ fun HistoryDetailScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(SimulationTexts.historyDetailTitle) },
+            AppTopBar(
+                title = SimulationTexts.historyDetailTitle,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
