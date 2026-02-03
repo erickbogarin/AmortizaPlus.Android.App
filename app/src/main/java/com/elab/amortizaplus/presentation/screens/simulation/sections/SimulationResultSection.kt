@@ -29,8 +29,7 @@ fun SimulationResultSection(
     summaryWith: SimulationSummary,
     modifier: Modifier = Modifier,
     onViewDetails: () -> Unit = {},
-    onEditSimulation: () -> Unit = {},
-    onNewSimulation: () -> Unit = {}
+    onEditSimulation: () -> Unit = {}
 ) {
     val showSavings = summaryWith.reducedMonths > 0 || summaryWith.interestSavings > 0.0
 
@@ -102,12 +101,6 @@ fun SimulationResultSection(
         AppButton(
             text = SimulationTexts.editSimulationButton,
             onClick = onEditSimulation,
-            variant = com.elab.amortizaplus.presentation.ds.components.ButtonVariant.Secondary
-        )
-
-        AppButton(
-            text = SimulationTexts.newSimulationButton,
-            onClick = onNewSimulation,
             variant = com.elab.amortizaplus.presentation.ds.components.ButtonVariant.Text
         )
     }

@@ -11,7 +11,6 @@ import com.elab.amortizaplus.domain.model.ExtraAmortizationStrategy
 import com.elab.amortizaplus.domain.model.InterestRateType
 import com.elab.amortizaplus.presentation.designsystem.theme.AmortizaPlusTheme
 import com.elab.amortizaplus.presentation.ds.components.AppButton
-import com.elab.amortizaplus.presentation.ds.components.AppCard
 import com.elab.amortizaplus.presentation.ds.components.AppOptionChip
 import com.elab.amortizaplus.presentation.ds.components.AppOutlinedTextField
 import com.elab.amortizaplus.presentation.ds.components.ButtonVariant
@@ -36,15 +35,15 @@ fun SimulationFormSection(
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
-    AppCard(modifier = modifier) {
-
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
+    ) {
         Text(
             text = SimulationTexts.formSectionTitle,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
-
-        Spacer(Modifier.height(AppSpacing.medium))
 
         // Valor do empréstimo
         AppOutlinedTextField(
@@ -144,6 +143,8 @@ fun SimulationFormSection(
         }
 
         Spacer(Modifier.height(AppSpacing.medium))
+        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+        Spacer(Modifier.height(AppSpacing.medium))
 
         ExtraAmortizationsSection(
             items = formState.extraAmortizations,
@@ -154,6 +155,8 @@ fun SimulationFormSection(
             onStrategyChange = actions.onExtraStrategyChange
         )
 
+        Spacer(Modifier.height(AppSpacing.medium))
+        Divider(color = MaterialTheme.colorScheme.outlineVariant)
         Spacer(Modifier.height(AppSpacing.medium))
 
         // Botão calcular

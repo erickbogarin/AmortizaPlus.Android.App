@@ -18,10 +18,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,17 +37,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import com.elab.amortizaplus.domain.model.Installment
-import com.elab.amortizaplus.presentation.ds.components.AppButton
 import com.elab.amortizaplus.presentation.ds.components.AppCard
 import com.elab.amortizaplus.presentation.ds.components.AppFinancialInfoRow
-import com.elab.amortizaplus.presentation.ds.components.ButtonVariant
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.designsystem.theme.success
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 import com.elab.amortizaplus.presentation.util.formatTerms
 import com.elab.amortizaplus.presentation.util.toCurrencyBR
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SimulationTableScreen(
     installmentsWithout: List<Installment>,
@@ -68,14 +73,21 @@ fun SimulationTableScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        bottomBar = {
-            AppButton(
-                text = SimulationTexts.tableBackButton,
-                onClick = onBack,
-                variant = ButtonVariant.Secondary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(AppSpacing.medium)
+        topBar = {
+            TopAppBar(
+                title = { Text(SimulationTexts.tableTitle) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = SimulationTexts.tableBackButton
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->
@@ -86,13 +98,6 @@ fun SimulationTableScreen(
                 .padding(AppSpacing.medium),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.large)
         ) {
-            Text(
-                text = SimulationTexts.tableTitle,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
             Text(
                 text = SimulationTexts.tableSubtitle,
                 style = MaterialTheme.typography.bodyMedium,

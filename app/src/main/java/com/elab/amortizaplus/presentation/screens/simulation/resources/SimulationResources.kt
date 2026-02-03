@@ -8,6 +8,7 @@ package com.elab.amortizaplus.presentation.screens.simulation.resources
 object SimulationTexts {
     // Títulos e labels
     val screenTitle = "Simulação de Financiamento"
+    val resultScreenTitle = "Resultado da Simulação"
     val formSectionTitle = "📋 Dados da Simulação"
     val resultSectionTitle = "📊 Resumo da Simulação"
     val summaryWithoutTitle = "📈 Resumo - Sem Amortização Extra"
@@ -47,6 +48,7 @@ object SimulationTexts {
     val editSimulationButton = "Editar Simulação"
     val viewTableButton = "Ver Tabela Detalhada"
     val retryButton = "Tentar novamente"
+    val moreOptions = "Mais opções"
     val tableTitle = "Tabela Detalhada"
     val tableSubtitle = "Detalhamento de parcelas e totais do cenário selecionado."
     val tableShowingWithExtra = "Mostrando parcelas com amortização extra"
