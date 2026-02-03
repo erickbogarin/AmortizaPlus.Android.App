@@ -39,6 +39,7 @@ import com.elab.amortizaplus.presentation.ds.components.AppCard
 import com.elab.amortizaplus.presentation.ds.components.AppFinancialInfoRow
 import com.elab.amortizaplus.presentation.ds.components.ButtonVariant
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
+import com.elab.amortizaplus.presentation.designsystem.theme.success
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 import com.elab.amortizaplus.presentation.util.formatTerms
 import com.elab.amortizaplus.presentation.util.toCurrencyBR
@@ -83,7 +84,7 @@ fun SimulationTableScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(AppSpacing.medium),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.large)
         ) {
             Text(
                 text = SimulationTexts.tableTitle,
@@ -98,40 +99,13 @@ fun SimulationTableScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
-            ) {
-                Text(
-                    text = if (showWithExtra) {
-                        SimulationTexts.tableShowingWithExtra
-                    } else {
-                        SimulationTexts.tableShowingWithoutExtra
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
-                ) {
-                    Text(
-                        text = SimulationTexts.tableToggleLabel,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Switch(
-                        checked = showWithExtra,
-                        onCheckedChange = { showWithExtra = it }
-                    )
-                }
-            }
-
             TableSummaryCard(data = data)
 
-            ColumnSelector(
-                selected = selectedColumns,
-                onToggle = { column ->
+            TableControlsCard(
+                showWithExtra = showWithExtra,
+                onToggleShowWithExtra = { showWithExtra = it },
+                selectedColumns = selectedColumns,
+                onToggleColumn = { column ->
                     selectedColumnsState.value = selectedColumns.toggle(column)
                 }
             )
@@ -170,6 +144,12 @@ private fun ColumnSelector(
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
+        Spacer(Modifier.height(AppSpacing.extraSmall))
+        Text(
+            text = SimulationTexts.tableColumnsHelper,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Spacer(Modifier.height(AppSpacing.small))
         Row(
             modifier = Modifier
@@ -185,6 +165,59 @@ private fun ColumnSelector(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun TableControlsCard(
+    showWithExtra: Boolean,
+    onToggleShowWithExtra: (Boolean) -> Unit,
+    selectedColumns: Set<TableColumn>,
+    onToggleColumn: (TableColumn) -> Unit
+) {
+    AppCard {
+        Text(
+            text = SimulationTexts.tableControlsTitle,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(Modifier.height(AppSpacing.small))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = SimulationTexts.tableToggleLabel,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Switch(
+                checked = showWithExtra,
+                onCheckedChange = onToggleShowWithExtra
+            )
+        }
+        Spacer(Modifier.height(AppSpacing.extraSmall))
+        AppFinancialInfoRow(
+            label = SimulationTexts.tableScenarioLabel,
+            value = if (showWithExtra) {
+                SimulationTexts.tableScenarioWithExtra
+            } else {
+                SimulationTexts.tableScenarioWithoutExtra
+            }
+        )
+        Spacer(Modifier.height(AppSpacing.medium))
+        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+        Spacer(Modifier.height(AppSpacing.medium))
+        ColumnSelector(
+            selected = selectedColumns,
+            onToggle = onToggleColumn
+        )
+        Spacer(Modifier.height(AppSpacing.small))
+        Text(
+            text = SimulationTexts.tableExtraHighlightLegend,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -234,13 +267,14 @@ private fun TableSummaryCard(data: List<Installment>) {
     ) {
         Text(
             text = SimulationTexts.tableSummaryTitle,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
         Spacer(Modifier.height(AppSpacing.extraSmall))
         AppFinancialInfoRow(
             label = SimulationTexts.tableSummaryTotalPaid,
-            value = totals.totalPaid.toCurrencyBR()
+            value = totals.totalPaid.toCurrencyBR(),
+            valueFontWeight = FontWeight.SemiBold
         )
         AppFinancialInfoRow(
             label = SimulationTexts.tableSummaryTotalInterest,
@@ -291,16 +325,12 @@ private fun TableDataRow(
     columns: List<TableColumn>
 ) {
     val hasExtra = item.extraAmortization > 0.0
-    val rowBackground = when {
-        hasExtra -> MaterialTheme.colorScheme.tertiaryContainer
-        item.month % 2 == 0 -> MaterialTheme.colorScheme.surfaceVariant
-        else -> MaterialTheme.colorScheme.surface
-    }
-    val rowTextColor = if (hasExtra) {
-        MaterialTheme.colorScheme.onTertiaryContainer
+    val rowBackground = if (item.month % 2 == 0) {
+        MaterialTheme.colorScheme.surfaceVariant
     } else {
-        MaterialTheme.colorScheme.onSurface
+        MaterialTheme.colorScheme.surface
     }
+    val rowTextColor = MaterialTheme.colorScheme.onSurface
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -315,11 +345,18 @@ private fun TableDataRow(
             color = rowTextColor
         )
         columns.forEach { column ->
+            val isExtraColumn = column == TableColumn.ExtraAmortization
+            val cellColor = if (hasExtra && isExtraColumn) {
+                MaterialTheme.colorScheme.success
+            } else {
+                rowTextColor
+            }
+            val isBold = hasExtra && isExtraColumn
             TableCell(
                 text = column.valueFor(item),
                 width = column.width,
-                bold = hasExtra,
-                color = rowTextColor
+                bold = isBold,
+                color = cellColor
             )
         }
     }

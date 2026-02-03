@@ -18,6 +18,7 @@ import com.elab.amortizaplus.presentation.ds.components.AppButton
 import com.elab.amortizaplus.presentation.ds.components.AppFinancialInfoRow
 import com.elab.amortizaplus.presentation.ds.components.AppCard
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
+import com.elab.amortizaplus.presentation.designsystem.theme.success
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 import com.elab.amortizaplus.presentation.util.formatTerms
 import com.elab.amortizaplus.presentation.util.toCurrencyBR
@@ -48,7 +49,10 @@ fun SimulationResultSection(
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(Modifier.height(AppSpacing.small))
-            SummaryRows(summaryWithout)
+            SummaryRows(
+                summary = summaryWithout,
+                totalPaidLabel = SimulationTexts.totalPaidWithoutLabel
+            )
 
             Divider(
                 modifier = Modifier.padding(vertical = AppSpacing.medium),
@@ -61,7 +65,10 @@ fun SimulationResultSection(
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(Modifier.height(AppSpacing.small))
-            SummaryRows(summaryWith)
+            SummaryRows(
+                summary = summaryWith,
+                totalPaidLabel = SimulationTexts.totalPaidWithLabel
+            )
 
             if (showSavings) {
                 Divider(
@@ -78,8 +85,8 @@ fun SimulationResultSection(
                     label = SimulationTexts.savingsInterestLabel,
                     value = summaryWith.interestSavings.toCurrencyBR()
                 )
-                AppFinancialInfoRow(
-                    label = SimulationTexts.savingsTermLabel,
+                SavingsTermRow(
+                    label = SimulationTexts.savingsTermEconomizedLabel,
                     value = summaryWith.reducedMonths.formatTerms()
                 )
             }
@@ -109,6 +116,10 @@ fun SimulationResultSection(
 @Composable
 private fun ResultHeader(value: String) {
     Column(
+        modifier = Modifier.padding(
+            top = AppSpacing.large,
+            bottom = AppSpacing.medium
+        ),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
     ) {
         Text(
@@ -124,20 +135,24 @@ private fun ResultHeader(value: String) {
         Text(
             text = value,
             style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.success
         )
     }
 }
 
 @Composable
-private fun SummaryRows(summary: SimulationSummary) {
+private fun SummaryRows(
+    summary: SimulationSummary,
+    totalPaidLabel: String
+) {
     val systemLabel = summary.system.toLabel()
     AppFinancialInfoRow(
         label = SimulationTexts.systemLabel,
         value = systemLabel
     )
     AppFinancialInfoRow(
-        label = SimulationTexts.totalPaidLabel,
+        label = totalPaidLabel,
         value = summary.totalPaid.toCurrencyBR()
     )
     AppFinancialInfoRow(
@@ -148,6 +163,28 @@ private fun SummaryRows(summary: SimulationSummary) {
         label = SimulationTexts.termLabel,
         value = summary.totalMonths.formatTerms()
     )
+}
+
+@Composable
+private fun SavingsTermRow(
+    label: String,
+    value: String
+) {
+    androidx.compose.foundation.layout.Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
 }
 
 private fun AmortizationSystem?.toLabel(): String = when (this) {
