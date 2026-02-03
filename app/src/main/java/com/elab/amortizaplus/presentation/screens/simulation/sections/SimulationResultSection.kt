@@ -26,9 +26,7 @@ import com.elab.amortizaplus.presentation.util.toCurrencyBR
 fun SimulationResultSection(
     summaryWithout: SimulationSummary,
     summaryWith: SimulationSummary,
-    modifier: Modifier = Modifier,
-    onViewDetails: () -> Unit = {},
-    onEditSimulation: () -> Unit = {}
+    modifier: Modifier = Modifier
 ) {
     val showSavings = summaryWith.reducedMonths > 0 || summaryWith.interestSavings > 0.0
 
@@ -90,18 +88,6 @@ fun SimulationResultSection(
             }
         }
 
-        Spacer(Modifier.height(AppSpacing.large))
-
-        AppButton(
-            text = SimulationTexts.viewTableButton,
-            onClick = onViewDetails
-        )
-
-        AppButton(
-            text = SimulationTexts.editSimulationButton,
-            onClick = onEditSimulation,
-            variant = com.elab.amortizaplus.presentation.ds.components.ButtonVariant.Text
-        )
     }
 }
 
