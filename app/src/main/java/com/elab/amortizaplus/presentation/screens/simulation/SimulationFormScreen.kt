@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
@@ -29,6 +31,7 @@ fun SimulationFormScreen(
     actions: SimulationFormActions,
     status: SimulationFormStatus,
     onRetry: () -> Unit,
+    showTaskModeIndicator: Boolean,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -65,6 +68,13 @@ fun SimulationFormScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(AppSpacing.medium)
         ) {
+            if (showTaskModeIndicator) {
+                Text(
+                    text = SimulationTexts.simulationTaskModeIndicator,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(bottom = AppSpacing.small)
+                )
+            }
             SimulationFormSection(
                 formState = formState,
                 actions = actions,

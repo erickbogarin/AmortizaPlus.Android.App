@@ -41,7 +41,8 @@ fun SimulationFormRoute(
             formState = formState,
             actions = actions,
             status = formStateUi?.status ?: SimulationFormStatus.Initial,
-            onRetry = viewModel::onCalculateClicked
+            onRetry = viewModel::onCalculateClicked,
+            showTaskModeIndicator = returnToRoute == HOME_ROUTE
         )
     } else {
         SimulationLoadingSection()
@@ -53,6 +54,9 @@ fun SimulationFormRoute(
         }
     }
 }
+
+// Must match returnTo used when starting simulation from Home (AppRoutes.HOME in MainActivity).
+private const val HOME_ROUTE = "home"
 
 @Composable
 fun SimulationResultRoute(

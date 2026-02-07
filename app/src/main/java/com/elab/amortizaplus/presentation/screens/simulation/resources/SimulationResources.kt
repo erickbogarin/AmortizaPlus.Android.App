@@ -141,6 +141,7 @@ object SimulationTexts {
     val extraAmountTooLow = "Valor deve ser maior que zero"
     // Estados
     val loadingMessage = "Calculando simulação..."
+    val simulationTaskModeIndicator = "Simulação de financiamento"
     // Resultados
     val totalPaidLabel = "Total Pago"
     val totalPaidWithoutLabel = "Total pago – sem amortização"
