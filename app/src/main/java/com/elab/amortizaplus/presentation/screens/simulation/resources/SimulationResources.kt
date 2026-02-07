@@ -78,6 +78,8 @@ object SimulationTexts {
     val tableMissingMessage = "Volte e calcule uma simulação para ver a tabela detalhada."
     // Histórico
     val historyTitle = "Histórico"
+    val historyNavLabel = "Histórico"
+    val simulationNavLabel = "Simular"
     val historyDetailTitle = "Detalhes da Simulação"
     val historyBackButton = "Voltar"
     val historyLoadingMessage = "Carregando histórico..."
