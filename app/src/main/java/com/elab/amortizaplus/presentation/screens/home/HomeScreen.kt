@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.elab.amortizaplus.presentation.ds.components.AppButton
+import com.elab.amortizaplus.presentation.ds.components.AppCard
 import com.elab.amortizaplus.presentation.ds.components.AppTopBar
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
@@ -41,6 +42,29 @@ fun HomeScreen(
                 onClick = onStartSimulation,
                 modifier = Modifier.padding(top = AppSpacing.medium)
             )
+            Column(
+                modifier = Modifier.padding(top = AppSpacing.large)
+            ) {
+                Text(text = SimulationTexts.homeLearnSectionTitle)
+                AppCard(
+                    modifier = Modifier.padding(top = AppSpacing.small)
+                ) {
+                    Text(text = SimulationTexts.homeLearnCard1Title)
+                    Text(
+                        text = SimulationTexts.homeLearnCard1Body,
+                        modifier = Modifier.padding(top = AppSpacing.extraSmall)
+                    )
+                }
+                AppCard(
+                    modifier = Modifier.padding(top = AppSpacing.small)
+                ) {
+                    Text(text = SimulationTexts.homeLearnCard2Title)
+                    Text(
+                        text = SimulationTexts.homeLearnCard2Body,
+                        modifier = Modifier.padding(top = AppSpacing.extraSmall)
+                    )
+                }
+            }
         }
     }
 }

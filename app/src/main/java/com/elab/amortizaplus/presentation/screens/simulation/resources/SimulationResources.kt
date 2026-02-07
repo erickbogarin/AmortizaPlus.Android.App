@@ -88,6 +88,13 @@ object SimulationTexts {
     val homeTitle = "Amortiza+"
     val homePlaceholder = "Home (placeholder)"
     val homeMicrocopy = "Simule seu financiamento e veja quanto pode economizar antecipando parcelas."
+    val homeLearnSectionTitle = "Aprenda"
+    val homeLearnCard1Title = "O que é amortização?"
+    val homeLearnCard1Body =
+        "Amortizar é reduzir o saldo devedor antes do prazo. Isso pode diminuir os juros e o tempo do financiamento."
+    val homeLearnCard2Title = "SAC vs PRICE"
+    val homeLearnCard2Body =
+        "No SAC, as parcelas tendem a cair com o tempo. Na PRICE, as parcelas são mais estáveis — mas os juros costumam pesar mais no início."
     val historyDetailTitle = "Detalhes da Simulação"
     val historyBackButton = "Voltar"
     val historyLoadingMessage = "Carregando histórico..."
