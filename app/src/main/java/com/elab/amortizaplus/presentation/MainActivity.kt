@@ -17,6 +17,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Icon
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -47,7 +48,8 @@ private fun AppNavHost() {
     val currentRoute = navBackStackEntry?.destination?.route
     val currentReturnTo = navBackStackEntry?.arguments?.getString(AppRoutes.RETURN_TO_ARG)
     val showBottomBar =
-        (currentRoute == AppRoutes.SIMULATION_ROUTE && currentReturnTo.isNullOrBlank()) ||
+        currentRoute == AppRoutes.HOME ||
+            (currentRoute == AppRoutes.SIMULATION_ROUTE && currentReturnTo.isNullOrBlank()) ||
             currentRoute == AppRoutes.HISTORY
 
     Scaffold(
@@ -55,10 +57,24 @@ private fun AppNavHost() {
             if (showBottomBar) {
                 NavigationBar(tonalElevation = 0.dp) {
                     NavigationBarItem(
+                        selected = currentRoute == AppRoutes.HOME,
+                        onClick = {
+                            navController.navigate(AppRoutes.HOME) {
+                                popUpTo(AppRoutes.HOME) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = { Icon(Icons.Filled.Home, contentDescription = null) },
+                        label = { Text(SimulationTexts.homeNavLabel) }
+                    )
+                    NavigationBarItem(
                         selected = currentRoute == AppRoutes.SIMULATION_ROUTE,
                         onClick = {
                             navController.navigate(AppRoutes.SIMULATION) {
-                                popUpTo(AppRoutes.SIMULATION_ROUTE) {
+                                popUpTo(AppRoutes.HOME) {
                                     saveState = true
                                 }
                                 launchSingleTop = true
@@ -72,7 +88,7 @@ private fun AppNavHost() {
                         selected = currentRoute == AppRoutes.HISTORY,
                         onClick = {
                             navController.navigate(AppRoutes.HISTORY) {
-                                popUpTo(AppRoutes.SIMULATION_ROUTE) {
+                                popUpTo(AppRoutes.HOME) {
                                     saveState = true
                                 }
                                 launchSingleTop = true
@@ -88,9 +104,12 @@ private fun AppNavHost() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = AppRoutes.SIMULATION_ROUTE,
+            startDestination = AppRoutes.HOME,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(AppRoutes.HOME) {
+                com.elab.amortizaplus.presentation.screens.home.HomeRoute()
+            }
             composable(
                 route = AppRoutes.SIMULATION_ROUTE,
                 arguments = listOf(
@@ -110,10 +129,9 @@ private fun AppNavHost() {
                     backStackEntry.arguments?.getString(AppRoutes.SAVED_SIMULATION_ID_ARG)
                 val returnToRoute =
                     backStackEntry.arguments?.getString(AppRoutes.RETURN_TO_ARG)
-                val parentEntry = remember { navController.getBackStackEntry(AppRoutes.SIMULATION_ROUTE) }
                 SimulationFormRoute(
                     selectedSimulationId = selectedSimulationId,
-                    parentEntry = parentEntry,
+                    parentEntry = backStackEntry,
                     onNavigateToResult = {
                         navController.navigate(AppRoutes.SIMULATION_RESULT)
                     },
@@ -208,6 +226,7 @@ private fun AppNavHost() {
 }
 
 private object AppRoutes {
+    const val HOME = "home"
     const val SIMULATION = "simulation"
     const val SAVED_SIMULATION_ID_ARG = "savedSimulationId"
     const val RETURN_TO_ARG = "returnTo"
