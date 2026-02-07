@@ -22,8 +22,7 @@ fun SimulationInitialSection(
     AppCard(modifier = modifier) {
         Text(
             text = SimulationTexts.initialTitle,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold
+            style = MaterialTheme.typography.bodySmall
         )
         Spacer(Modifier.height(AppSpacing.extraSmall))
         Text(

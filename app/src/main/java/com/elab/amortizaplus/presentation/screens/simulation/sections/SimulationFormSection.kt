@@ -24,6 +24,7 @@ import com.elab.amortizaplus.presentation.screens.simulation.SimulationFormActio
 import com.elab.amortizaplus.presentation.screens.simulation.SimulationFormState
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 import com.elab.amortizaplus.presentation.screens.simulation.validation.SimulationInputValidator
+import com.elab.amortizaplus.presentation.ds.components.textfield.formatters.PercentageFormatter
 //import com.elab.amortizaplus.presentation.util.asString
 //import com.elab.amortizaplus.presentation.util.text.SimulationTexts
 
@@ -41,7 +42,7 @@ fun SimulationFormSection(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -55,14 +56,15 @@ fun SimulationFormSection(
             shape = MaterialTheme.shapes.medium
         ) {
             Column(
-                modifier = Modifier.padding(AppSpacing.small),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
+                modifier = Modifier.padding(AppSpacing.small)
             ) {
                 Text(
                     text = SimulationTexts.financingAboutTitle,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
+
+                Spacer(Modifier.height(AppSpacing.extraSmallTight))
 
                 // Valor do empréstimo
                 AppOutlinedTextField(
@@ -76,28 +78,19 @@ fun SimulationFormSection(
                     showSuccessIcon = formState.loanAmountError == null && formState.loanAmount.isNotBlank()
                 )
 
-                Spacer(Modifier.height(AppSpacing.extraSmall))
+                Spacer(Modifier.height(AppSpacing.extraSmallTight))
 
                 val termsValue = formState.terms.toIntOrNull()
                 val minTerms = SimulationInputValidator.MIN_TERMS
                 val maxTerms = SimulationInputValidator.MAX_TERMS
                 val sliderValue = (termsValue ?: minTerms).coerceIn(minTerms, maxTerms).toFloat()
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = SimulationTexts.termsLabel,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Text(
-                        text = "${sliderValue.roundToInt()} ${SimulationTexts.termsUnitMonths}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+                ParameterHeader(
+                    label = SimulationTexts.termsLabel,
+                    value = "${sliderValue.roundToInt()} ${SimulationTexts.termsUnitMonths}"
+                )
+
+                Spacer(Modifier.height(AppSpacing.extraSmallTight))
 
                 Slider(
                     value = sliderValue,
@@ -115,19 +108,29 @@ fun SimulationFormSection(
                     )
                 }
 
-                Spacer(Modifier.height(AppSpacing.extraSmall))
+                Spacer(Modifier.height(AppSpacing.extraSmallTight))
 
                 // Data de início
-                AppOutlinedTextField(
-                    value = formState.startDate,
-                    onValueChange = actions.onStartDateChange,
-                    label = SimulationTexts.startDateLabel,
-                    placeholder = SimulationTexts.startDatePlaceholder,
-                    variant = TextFieldVariant.MonthYear,
-                    supportingText = formState.startDateError,
-                    isError = formState.startDateError != null,
-                    showSuccessIcon = formState.startDateError == null && formState.startDate.isNotBlank()
-                )
+                Column {
+                    val startDateDisplay = formatMonthYear(formState.startDate)
+                    ParameterHeader(
+                        label = SimulationTexts.startDateLabel,
+                        value = startDateDisplay
+                    )
+
+                    Spacer(Modifier.height(AppSpacing.extraSmall))
+
+                    AppOutlinedTextField(
+                        value = formState.startDate,
+                        onValueChange = actions.onStartDateChange,
+                        label = "",
+                        placeholder = SimulationTexts.startDatePlaceholder,
+                        variant = TextFieldVariant.MonthYear,
+                        supportingText = formState.startDateError,
+                        isError = formState.startDateError != null,
+                        showSuccessIcon = formState.startDateError == null && formState.startDate.isNotBlank()
+                    )
+                }
             }
         }
 
@@ -143,8 +146,7 @@ fun SimulationFormSection(
             shape = MaterialTheme.shapes.medium
         ) {
             Column(
-                modifier = Modifier.padding(AppSpacing.small),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
+                modifier = Modifier.padding(AppSpacing.small)
             ) {
                 Text(
                     text = SimulationTexts.conditionsTitle,
@@ -152,47 +154,70 @@ fun SimulationFormSection(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                AppOutlinedTextField(
-                    value = formState.interestRate,
-                    onValueChange = actions.onInterestRateChange,
-                    label = SimulationTexts.interestRateLabel,
-                    placeholder = SimulationTexts.interestRatePlaceholder,
-                    variant = TextFieldVariant.Percentage,
-                    supportingText = formState.interestRateError,
-                    isError = formState.interestRateError != null,
-                    showSuccessIcon = formState.interestRateError == null && formState.interestRate.isNotBlank()
-                )
+                Spacer(Modifier.height(AppSpacing.extraSmallTight))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
-                ) {
-                    AppOptionChip(
-                        selected = formState.rateType == InterestRateType.MONTHLY,
-                        text = SimulationTexts.rateTypeMonthly,
-                        onClick = { actions.onRateTypeChange(InterestRateType.MONTHLY) },
-                        modifier = Modifier.heightIn(min = AppDimens.buttonHeightMedium)
+                Column {
+                    val rateDisplay = PercentageFormatter().formatForDisplay(formState.interestRate)
+                    ParameterHeader(
+                        label = SimulationTexts.interestRateLabel,
+                        value = rateDisplay
                     )
-                    AppOptionChip(
-                        selected = formState.rateType == InterestRateType.ANNUAL,
-                        text = SimulationTexts.rateTypeAnnual,
-                        onClick = { actions.onRateTypeChange(InterestRateType.ANNUAL) },
-                        modifier = Modifier.heightIn(min = AppDimens.buttonHeightMedium)
+
+                    Spacer(Modifier.height(AppSpacing.extraSmall))
+
+                    AppOutlinedTextField(
+                        value = formState.interestRate,
+                        onValueChange = actions.onInterestRateChange,
+                        label = "",
+                        placeholder = SimulationTexts.interestRatePlaceholder,
+                        variant = TextFieldVariant.Percentage,
+                        supportingText = formState.interestRateError,
+                        isError = formState.interestRateError != null,
+                        showSuccessIcon = formState.interestRateError == null && formState.interestRate.isNotBlank()
                     )
+
+                    Spacer(Modifier.height(AppSpacing.extraSmallTight))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(AppSpacing.extraSmallTight)
+                    ) {
+                        AppOptionChip(
+                            selected = formState.rateType == InterestRateType.MONTHLY,
+                            text = SimulationTexts.rateTypeMonthly,
+                            onClick = { actions.onRateTypeChange(InterestRateType.MONTHLY) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .heightIn(min = AppDimens.buttonHeightMedium)
+                        )
+                        AppOptionChip(
+                            selected = formState.rateType == InterestRateType.ANNUAL,
+                            text = SimulationTexts.rateTypeAnnual,
+                            onClick = { actions.onRateTypeChange(InterestRateType.ANNUAL) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .heightIn(min = AppDimens.buttonHeightMedium)
+                        )
+                    }
                 }
 
-                Spacer(Modifier.height(AppSpacing.extraSmall))
+                Spacer(Modifier.height(AppSpacing.extraSmallTight))
 
-                Text(
-                    text = SimulationTexts.amortizationTypeTitle,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
+                ParameterHeader(
+                    label = SimulationTexts.amortizationTypeTitle,
+                    value = if (formState.system == AmortizationSystem.SAC) {
+                        SimulationTexts.systemSac
+                    } else {
+                        SimulationTexts.systemPrice
+                    }
                 )
+
+                Spacer(Modifier.height(AppSpacing.extraSmallTight))
 
                 // Sistema de amortização (SAC / PRICE)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.extraSmallTight)
                 ) {
                     AppOptionChip(
                         selected = formState.system == AmortizationSystem.SAC,
@@ -226,14 +251,15 @@ fun SimulationFormSection(
             shape = MaterialTheme.shapes.medium
         ) {
             Column(
-                modifier = Modifier.padding(AppSpacing.small),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
+                modifier = Modifier.padding(AppSpacing.small)
             ) {
                 Text(
                     text = SimulationTexts.extraAmortizationsTitle,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
+
+                Spacer(Modifier.height(AppSpacing.extraSmallTight))
 
                 ExtraAmortizationsSection(
                     items = formState.extraAmortizations,
@@ -246,12 +272,29 @@ fun SimulationFormSection(
             }
         }
 
-        // Botão calcular
-        AppButton(
-            text = SimulationTexts.calculateButton,
-            onClick = actions.onCalculate,
-            enabled = formState.isValid() && !isLoading,
-            isLoading = isLoading
+    }
+}
+
+@Composable
+private fun ParameterHeader(
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = AppDimens.buttonHeightSmall),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall
+        )
+        Spacer(Modifier.weight(1f))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Medium
         )
     }
 }
@@ -271,7 +314,7 @@ private fun ExtraAmortizationsSection(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(Modifier.height(AppSpacing.small))
+        Spacer(Modifier.height(AppSpacing.extraSmallTight))
     }
 
     items.forEach { item ->
@@ -290,6 +333,15 @@ private fun ExtraAmortizationsSection(
         onClick = onAdd,
         variant = ButtonVariant.Secondary
     )
+}
+
+private fun formatMonthYear(raw: String): String {
+    val digits = raw.filter { it.isDigit() }
+    return when {
+        digits.isBlank() -> ""
+        digits.length <= 2 -> digits
+        else -> digits.substring(0, 2) + "/" + digits.substring(2)
+    }
 }
 
 @Composable
