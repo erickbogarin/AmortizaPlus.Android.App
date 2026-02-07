@@ -32,6 +32,10 @@ fun HomeScreen(
                 .padding(AppSpacing.medium)
         ) {
             Text(text = SimulationTexts.homePlaceholder)
+            Text(
+                text = SimulationTexts.homeMicrocopy,
+                modifier = Modifier.padding(top = AppSpacing.small)
+            )
             AppButton(
                 text = SimulationTexts.newSimulationButton,
                 onClick = onStartSimulation,

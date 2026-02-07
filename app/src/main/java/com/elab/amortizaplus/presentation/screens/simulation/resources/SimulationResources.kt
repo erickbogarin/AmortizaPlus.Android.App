@@ -87,6 +87,7 @@ object SimulationTexts {
     val homeNavLabel = "Home"
     val homeTitle = "Amortiza+"
     val homePlaceholder = "Home (placeholder)"
+    val homeMicrocopy = "Simule seu financiamento e veja quanto pode economizar antecipando parcelas."
     val historyDetailTitle = "Detalhes da Simulação"
     val historyBackButton = "Voltar"
     val historyLoadingMessage = "Carregando histórico..."
