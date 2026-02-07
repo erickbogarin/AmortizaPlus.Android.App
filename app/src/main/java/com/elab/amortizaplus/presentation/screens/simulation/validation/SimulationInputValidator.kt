@@ -16,6 +16,10 @@ import java.time.YearMonth
  * - Prazo fora de 1–600 meses → erro de validação.
  */
 class SimulationInputValidator {
+    companion object {
+        const val MIN_TERMS = 1
+        const val MAX_TERMS = 600
+    }
 
     fun validateLoanAmount(value: String): ValidationResult {
         if (value.isBlank()) {
@@ -63,8 +67,8 @@ class SimulationInputValidator {
             ?: return ValidationResult(false, SimulationTexts.invalidTerms)
 
         return when {
-            terms <= 0 -> ValidationResult(false, SimulationTexts.termsMustBeGreaterThanZero)
-            terms > 600 -> ValidationResult(false, SimulationTexts.maxTerms)
+            terms < MIN_TERMS -> ValidationResult(false, SimulationTexts.termsMustBeGreaterThanZero)
+            terms > MAX_TERMS -> ValidationResult(false, SimulationTexts.maxTerms)
             else -> ValidationResult(true)
         }
     }

@@ -10,6 +10,9 @@ object SimulationTexts {
     val screenTitle = "Simulação de Financiamento"
     val resultScreenTitle = "Resultado da Simulação"
     val formSectionTitle = "📋 Dados da Simulação"
+    val financingAboutTitle = "Sobre o financiamento"
+    val conditionsTitle = "Condições"
+    val amortizationTypeTitle = "Tipo de amortização"
     val resultSectionTitle = "📊 Resumo da Simulação"
     val summaryWithoutTitle = "📈 Resumo - Sem Amortização Extra"
     val summaryWithTitle = "📉 Resumo - Com Amortização Extra"
@@ -24,6 +27,7 @@ object SimulationTexts {
     val interestRatePlaceholder = "Ex: 13"
     val termsLabel = "Prazo (meses)"
     val termsPlaceholder = "Ex: 420"
+    val termsUnitMonths = "meses"
     val startDateLabel = "Data de início (mês/ano)"
     val startDatePlaceholder = "Ex: 02/2026"
     // Opções

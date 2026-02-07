@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.elab.amortizaplus.presentation.ds.components.AppButton
 import com.elab.amortizaplus.presentation.ds.components.AppCard
-import com.elab.amortizaplus.presentation.ds.components.AppInfoCard
+import com.elab.amortizaplus.presentation.ds.components.AppCard
 import com.elab.amortizaplus.presentation.ds.components.AppLoadingIndicator
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
@@ -19,7 +19,7 @@ import com.elab.amortizaplus.presentation.screens.simulation.resources.Simulatio
 fun SimulationInitialSection(
     modifier: Modifier = Modifier
 ) {
-    AppInfoCard(modifier = modifier) {
+    AppCard(modifier = modifier) {
         Text(
             text = SimulationTexts.initialTitle,
             style = MaterialTheme.typography.titleSmall,
@@ -28,7 +28,7 @@ fun SimulationInitialSection(
         Spacer(Modifier.height(AppSpacing.extraSmall))
         Text(
             text = SimulationTexts.initialDescription,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodySmall
         )
     }
 }
