@@ -7,12 +7,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.elab.amortizaplus.presentation.ds.components.AppButton
 import com.elab.amortizaplus.presentation.ds.components.AppTopBar
 import com.elab.amortizaplus.presentation.ds.foundation.AppSpacing
 import com.elab.amortizaplus.presentation.screens.simulation.resources.SimulationTexts
 
 @Composable
 fun HomeScreen(
+    onStartSimulation: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -30,6 +32,11 @@ fun HomeScreen(
                 .padding(AppSpacing.medium)
         ) {
             Text(text = SimulationTexts.homePlaceholder)
+            AppButton(
+                text = SimulationTexts.newSimulationButton,
+                onClick = onStartSimulation,
+                modifier = Modifier.padding(top = AppSpacing.medium)
+            )
         }
     }
 }

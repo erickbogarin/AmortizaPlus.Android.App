@@ -108,7 +108,11 @@ private fun AppNavHost() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(AppRoutes.HOME) {
-                com.elab.amortizaplus.presentation.screens.home.HomeRoute()
+                com.elab.amortizaplus.presentation.screens.home.HomeRoute(
+                    onStartSimulation = {
+                        navController.navigate(AppRoutes.simulationWithReturnTo(AppRoutes.HOME))
+                    }
+                )
             }
             composable(
                 route = AppRoutes.SIMULATION_ROUTE,
@@ -245,6 +249,10 @@ private object AppRoutes {
 
     fun simulationWithSavedId(id: String, returnTo: String): String {
         return "$SIMULATION?$SAVED_SIMULATION_ID_ARG=$id&$RETURN_TO_ARG=$returnTo"
+    }
+
+    fun simulationWithReturnTo(returnTo: String): String {
+        return "$SIMULATION?$RETURN_TO_ARG=$returnTo"
     }
 
     fun simulationResultWithSavedId(id: String): String {
